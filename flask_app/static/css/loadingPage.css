@@ -1,0 +1,31 @@
+.loadingContent {
+    display: none;
+    flex-direction: column;
+    width: 31.25rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.loadingContent .loadingMessage {
+    text-align: center;
+    font-size: min(1.5rem, 3.5vw);
+}
+
+.loadingContent img {
+    width: 50%;
+}
+
+.loadingChunk {
+    display: none;
+    width: 2rem;
+}
+
+.loadingChunk img {
+    width: 100%;
+}
+
+@media (max-width: 650px) {
+    .loadingContent {
+        width: 80vw;
+    }
+}

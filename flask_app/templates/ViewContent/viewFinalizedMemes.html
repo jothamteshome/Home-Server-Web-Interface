@@ -1,0 +1,14 @@
+{% extends 'viewContent/view.html' %}
+
+{% block viewJS %}
+<script src="{{ url_for('static', filename='js/ViewContent/viewFinalizedMemes.js')}}" defer></script>
+{% endblock %}
+
+{% block customSortingRow %}
+<div class="sorting-radio-row">
+    <div class="sorting-option">
+        <input type="radio" name="sorting" value="shuffle" id="shuffled" checked>
+        <label for="shuffled">Shuffled</label>
+    </div>
+</div>
+{% endblock %}

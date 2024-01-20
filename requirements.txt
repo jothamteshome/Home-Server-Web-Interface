@@ -1,0 +1,7 @@
+flask
+gunicorn
+Flask-Failsafe
+Pillow
+opencv-python
+mysql-connector-python
+cryptography

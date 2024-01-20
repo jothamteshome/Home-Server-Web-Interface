@@ -1,0 +1,45 @@
+{% extends 'shared/layout.html' %}
+
+{% block extrajs %}
+<script src="{{ url_for('static', filename='js/login.js') }}" defer></script>
+{% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{% endblock %}
+
+
+{% block maincontent %}
+<!-- Entire login page section -->
+<div class="login-page-section">
+    <!-- Title on page -->
+    <h1>Login</h1>
+
+    <!-- Div containing elements of the form -->
+    <div class="form-section">
+
+        <!-- Line to seperate title from input fields -->
+        <div class="login-separator"></div>
+
+        <!-- Form containing input fields for email and password -->
+        <form class="login-form">
+            <!-- Email input field -->
+            <input type="email" class="input-field" name="username" id="username" placeholder="Your Email">
+
+            <!-- Password input field -->
+            <input type="password" class="input-field" name="password" id="password" placeholder="Your Password">
+
+            <!-- Sumbission button -->
+            <input type="button" class="submit-button" id="login-submit" value="LOG IN">
+
+            <!-- Sign up button -->
+            <input type="button" class="submit-button" id="login-sign_up" value="SIGN UP">
+        </form>
+
+        <!-- Displays number of failures -->
+        <div class="hidden-content" id="submission-failed"></div>
+    </div>
+</div>
+{% endblock %}
+
+

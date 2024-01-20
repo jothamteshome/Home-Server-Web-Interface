@@ -1,0 +1,93 @@
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 83vh;
+    height: auto;
+    width: 100%;
+    background-color: #ffffff;
+}
+
+
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 25rem;
+    min-height: 30vh;
+    align-self: center;
+    align-items: center;
+    justify-content: space-around;
+    justify-self: center;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 9px 2px #000000;
+    margin-bottom: 7vh;
+}
+
+.form .dropdown-selector {
+    width: 90%;
+    min-height: 5vh;
+    height: fit-content;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: #253237;
+    color: #ffffff;
+    margin-top: 1rem;
+}
+
+.form .sorting-radio-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 90%;
+    justify-content: space-evenly;
+}
+
+.sorting-radio-row .sorting-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0.5rem;
+}
+
+.dropdown-selector option {
+    background-color: #364951;
+    width: calc(90% - 20px);
+}
+
+.form .submit {
+    height: 5vh;
+    width: 90%;
+    border: 0.1rem solid #000000;
+    border-radius: 20px;
+    font-weight: bold;
+    background-color: #364951;
+    color: #FFFFFF;
+    cursor: pointer;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.performActionAgain {
+    position: sticky;
+    bottom: 7vh;
+    left: 85vw;
+    max-width: 7rem;
+    padding: 0.2rem;
+    background-color: #00ffff;
+    font-weight: bold;
+    text-align: center;
+    border: 0.1rem solid #000000;
+    border-radius: 15px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #000000;
+}
+
+
+@media (max-width: 650px) {
+    .form {
+        width: 80vw;
+    }
+}

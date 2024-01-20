@@ -1,0 +1,28 @@
+{% extends 'viewContent/view.html' %}
+
+{% block viewCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/viewOptions.css') }}">
+{% endblock %}
+
+{% block viewJS %}
+<script src="{{ url_for('static', filename='js/ViewContent/viewShows.js')}}" defer></script>
+{% endblock %}
+
+{% block customSortingRow %}
+<div class="sorting-radio-row">
+    <div class="sorting-option">
+        <input type="radio" name="sorting" value="A-Z" id="A-Z" checked>
+        <label for="A-Z">A-Z</label>
+    </div>
+
+    <div class="sorting-option">
+        <input type="radio" name="sorting" value="Z-A" id="Z-A">
+        <label for="Z-A">Z-A</label>
+    </div>
+
+    <div class="sorting-option">
+        <input type="radio" name="sorting" value="shuffle" id="shuffled">
+        <label for="shuffled">Shuffled</label>
+    </div>
+</div>
+{% endblock %}

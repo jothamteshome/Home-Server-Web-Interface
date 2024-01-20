@@ -1,0 +1,20 @@
+{% extends 'UploadContent/upload.html' %}
+
+{% block uploadCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/displayReturnedContent.css') }}">
+{% endblock %}
+
+
+{% block uploadJS %}
+<script src="{{ url_for('static', filename='js/displayReturnedContent.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/UploadContent/uploadFinalizedMeme.js')}}" defer></script>
+{% endblock %}
+
+{% block uploadFormComponents %}
+<textarea class="caption-section" rows="5" columns="33" placeholder="Insert Caption Here" name="caption" required></textarea>
+{% endblock %}
+
+{% block uploadFormFiles %}
+<input type="file" title="Upload finalized meme" 
+    id="choose-images" class="file-selector" name="file" accept="image/png, image/jpeg, image/gif" required>
+{% endblock %}

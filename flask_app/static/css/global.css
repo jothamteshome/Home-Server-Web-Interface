@@ -1,0 +1,22 @@
+/* Remove padding and margin from body and
+   set global font of page */
+   body {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    width: 100%;
+    overflow-x: hidden;
+    font-size: 2vh;
+}
+
+/* Set size of an icon */
+.icon {
+    height: 5vh;
+    cursor: pointer;
+}
+
+/* Change opacity when icon is hovered over */
+.icon:hover {
+    opacity: 50%;
+}

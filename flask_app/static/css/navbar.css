@@ -1,0 +1,142 @@
+.navbar {
+    display: flex;
+    position: sticky;
+    top: 0;
+    height: 12vh;
+    width: 100%;
+    background-color:#253237;
+    color: #FFFFFF;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+}
+
+/* Styling for the title of the page */
+.navbar .title {
+    margin-left: 2vw;
+    font-size: 3vh;
+    font-weight: bold;
+    text-shadow: 0 0.2vh 0.1vh #000000;
+}
+
+/* Container of navigation links */
+.navbar .links {
+    display: flex;
+    height: 100%;
+    justify-content: space-evenly;
+    align-items: center;
+    justify-content: center;
+    margin-right: 2vh
+}
+
+
+
+/* Each individual link element */
+.menu-bar-display .link-element {
+    padding: 1vh 1vw 1vh 1vw;
+}
+
+.links .link-element {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 1vw;
+    text-align: center;
+    height: 100%;
+}
+
+.link-element .drop-content {
+    display: none;
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    padding-top: 1vh;
+    top: 12vh;
+    background-color:#364951;
+    list-style-type: none;
+    white-space: nowrap;
+    width: 10rem;
+}
+
+#upload {
+    right: 8vw;
+}
+
+#view {
+    right: 2.75vw;
+}
+
+.drop-content li {
+    height: 2rem;
+    width: 100%;
+}
+
+.link-element:hover .drop-content {
+    display: block;
+}
+
+/* Remove text decoration and set color
+   of links to white */
+.link-element .link, .title .link {
+    text-decoration: none;
+    color: #FFFFFF;
+    transition: 0.5s;
+}
+
+/* Change opacity when links are hovered over */
+.link-element .link:hover {
+    opacity: 50%;
+    transition: 0.5s;
+}
+
+/* Creates container for links after menu
+   bar click */
+.navbar .menu-bar-display {
+    padding: 1vh 0 1vh 0;
+    position: absolute;
+    top: 12vh;
+    background-color: #364951;
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    z-index: 2;
+}
+
+/* Checkbox responsible for dropdown menu appearing */
+.navbar #menu-bar-checkbox {
+    display: none;
+}
+
+/* Allow dropdown menu to appear once menu bar is clicked */
+.navbar #menu-bar-checkbox:checked ~ .menu-bar-display {
+    display: flex;
+}
+
+/* Creates a container for the menu bar icon */
+.navbar .menu-bar-icon {
+    position: relative;
+    display: none;
+    margin-right: 5vw;
+    align-items: center;
+}
+
+/* Allow for different styling options when 
+   screen size is below 650px */
+@media (max-width: 650px) {
+
+    /* Make space between page title and menu icon when
+       page is less than 650 px */
+    .navbar {
+        justify-content: space-between;
+    }
+
+    /* Remove links from navbar */
+    .navbar .links {
+        display: none;
+    }
+
+    /* Display menu bar icon */
+    .navbar .menu-bar-icon {
+        display: flex;
+    }
+}

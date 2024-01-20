@@ -1,0 +1,60 @@
+
+.success-message {
+    padding: 0;
+    margin: 5vh 0 5vh 0;
+    font-size: 1.5rem;
+    overflow-wrap: break-word;
+    text-align: center;
+    width: 80vw;
+}
+
+.content-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80vw;
+}
+
+.content-column .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 3vh;
+}
+
+
+.content-wrapper .content {
+    display: block;
+    object-fit: contain;
+    outline: 0.1rem solid #000000;
+}
+
+
+.content-wrapper .content-text-column {
+    display: flex;
+    flex-direction: column;
+    width: min(80vw, 31.25rem);
+}
+
+.content-wrapper .content-title, .content-wrapper h3 {
+    padding: 0;
+    margin: 1vh 0 0 0;
+    font-weight: normal;
+    font-size: 2.3vh;
+    text-align: center;
+    word-break: break-all;
+}
+
+.content-text-column .content-caption {
+    text-align: center;
+    white-space: pre-line;
+}
+
+.content-text-column .horizontal-line {
+    min-height: 0.1rem;
+    max-height: 0.1rem;
+    min-width: 100%;
+    max-width: 100%;
+    background-color: #000000;
+}

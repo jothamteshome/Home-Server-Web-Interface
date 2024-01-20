@@ -1,0 +1,28 @@
+{% extends 'shared/layout.html' %}
+
+{% block extracss %}
+{% block uploadCSS %}{% endblock %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/contentGallery.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/loadingPage.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}">
+{% endblock %}
+
+{% block extrajs %}
+{% block uploadJS %}{% endblock %}
+<script src="{{ url_for('static', filename='js/UploadContent/upload.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/createContentGallery.js') }}" defer></script>
+{% endblock %}
+
+{% block maincontent %}
+<form class="form">
+    {% block uploadFormComponents %}{% endblock %}
+    <label for="choose-images" class="file-selector-label">Upload Image(s)</label>
+    {% block uploadFormFiles %}{% endblock %}
+    <input type="button" title="Submit fields for new image upload" value="Upload Image(s)" class="submit">
+</form>
+
+<div class="loadingContent">
+    <h1 class="loadingMessage"></h1>
+    <img src="{{url_for('static', filename='images/loading-wheel-gif.gif')}}" loading="lazy" alt="loading-gif">
+</div>
+{% endblock %}

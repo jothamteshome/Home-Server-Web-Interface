@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- CSS stylesheets necessary for page layout -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+        {% block extracss %} {% endblock %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/simmerjs@0.5.6/dist/simmer.js"></script>
+        <script src="{{url_for('static', filename='js/navbar.js') }}" defer></script>
+        <script src="{{url_for('static', filename='js/global.js') }}" defer></script>
+        {% block extrajs %}{% endblock %}
+
+
+        <!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <meta charset="UTF-8">
+
+        <!-- Enables scaling for mobile -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <!-- Title in tab of browser -->
+        <title>Home-Server</title>
+    </head>
+    <body>
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <!-- Title of Website-->
+            <div class="title"><a class="link" href="/home">Home-Server</a></div>
+
+            <!-- Navigation Links -->
+            <div class="links">
+                {% if role == 'admin' %}
+                    <div class="link-element">
+                        <p class="link">Upload</p>
+                            <ul class="drop-content" id="upload">
+                            {% if "finalized-memes-dirs" in cond_routes %}
+                                <li><a class="link" href="/uploadFinalizedMeme">Finalized Meme</a></li>
+                            {% endif %}
+                            <li><a class="link" href="/uploadShortformContent">Images & Clips</a></li>
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <div class="link-element">
+                    <p class="link">View</p>
+                    <ul class="drop-content" id="view">
+                        <li><a class="link" href="/viewComics">Comics</a></li>
+                        {% if "finalized-memes-dirs" in cond_routes %}
+                            <li><a class="link" href="/viewFinalizedMemes">Finalized Memes</a></li>
+                        {% endif %}
+                        {% if "premade-memes-dirs" in cond_routes %}
+                            <li><a class="link" href="/viewPremadeMemes">Premade Memes</a></li>
+                        {% endif %}
+
+                        <li><a class="link" href="/viewShortformContent">Images & Clips</a></li>
+                        <li><a class="link" href="/viewShows">Shows & Movies</a></li>
+                    </ul>
+                </div>
+
+                {% if user %}
+                    <div class="link-element"><a class="link" href="/logout">Logout</a></div>
+                {% else %}
+                    <div class="link-element"><a class="link" href="/login">Log In</a></div>
+                {% endif %}
+            </div>
+
+            <!-- Checkbox responsible for making dropdown menu appear -->
+            <input id="menu-bar-checkbox" type="checkbox" title="Click to reveal dropdown menu">
+
+            <!-- Menu Bar icon-->
+            <div class="menu-bar-icon">
+                <label for="menu-bar-checkbox" id="menu-bar-img"><img class="icon" src="{{ url_for('static', filename='images/menu-bar.png') }}" alt="Menu Bar Icon" loading="lazy"></label>
+            </div>
+
+            <!-- Display for links after menu bar icon is selected -->
+            <div class="menu-bar-display">
+                {% if role == 'admin' %}
+                    {% if "finalized-memes-dirs" in cond_routes %}
+                        <div class="link-element"><a class="link" href="/uploadFinalizedMeme">Upload Finalized Meme</a></div>
+                    {% endif %}
+                    <div class="link-element"><a class="link" href="/uploadShortformContent">Upload Images & Clips</a></div>
+                {% endif %}
+
+                <div class="link-element"><a class="link" href="/viewComics">View Comics</a></div>
+                
+                {% if "finalized-memes-dirs" in cond_routes %}
+                    <div class="link-element"><a class="link" href="/viewFinalizedMemes">View Finalized Memes</a></div>
+                {% endif %}
+                {% if "premade-memes-dirs" in cond_routes %}
+                    <div class="link-element"><a class="link" href="/viewPremadeMemes">View Premade Memes</a></div>
+                {% endif %}
+                
+                <div class="link-element"><a class="link" href="/viewShortformContent">View Images & Clips</a></div>
+                <div class="link-element"><a class="link" href="/viewShows">View Shows & Movies</a></div>
+                {% if user %}
+                    <div class="link-element"><a class="link" href="/logout">Logout</a></div>
+                {% else %}
+                    <div class="link-element"><a class="link" href="/login">Log In</a></div>
+                {% endif %}
+            </div>
+            
+        </nav>
+
+        <!-- Main Content Section -->
+        <main class="main">
+            {% block maincontent %}{% endblock %}
+        </main>
+        
+
+        <!-- Footer -->
+        <footer class="footer">
+            <h3>© Home-Server</h3>
+        </footer>
+    </body>
+</html>

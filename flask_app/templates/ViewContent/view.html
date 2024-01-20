@@ -1,0 +1,35 @@
+{% extends 'shared/layout.html' %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/loadingPage.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/contentGallery.css') }}">
+{% block viewCSS %}{% endblock %}
+{% endblock %}
+
+{% block extrajs %}
+{% block viewJS %}{% endblock %}
+<script src="{{ url_for('static', filename='js/dropdownSelection.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/createContentGallery.js')}}" defer></script>
+<script src="{{ url_for('static', filename='js/ViewContent/view.js')}}" defer></script>
+{% endblock %}
+
+{% block maincontent %}
+<form class="form">
+    <select class="dropdown-selector" required>
+        {% for content in contentList %}
+            {% if content.get('disabled', False) %}
+                <option disabled>{{content['name']}}</option>
+            {% else %}
+                <option value="{{content['data']}}">{{content['name']}}</option>
+            {% endif %}
+        {% endfor %}
+    </select>
+    {% block customSortingRow %}{% endblock %}
+    <input type="button" title="Submit selection to view content" value="View Content" class="submit">
+</form>
+
+<div class="loadingContent">
+    <h1 class="loadingMessage"></h1>
+    <img src="{{url_for('static', filename='images/loading-wheel-gif.gif')}}" loading="lazy" alt="loading-gif">
+</div>
+{% endblock %}

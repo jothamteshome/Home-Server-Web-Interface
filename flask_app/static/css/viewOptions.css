@@ -1,0 +1,84 @@
+.main .optionsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.optionsContainer .optionList {
+    display: flex;
+    flex-direction: column;
+    width: 40vw;
+    align-items: center;
+    justify-content: center;
+    list-style-type: none;
+    padding: 0;
+}
+
+.optionList .option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 3em;
+    height: fit-content;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 9px 2px #000000;
+    padding: 0.5rem 1rem;
+    transition: 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+
+.optionList .option:hover {
+    transition: 0.2s;
+    scale: 1.1;
+}
+
+.option .click-box {
+    background-color: #000000;
+    opacity: 1;
+    z-index: 3;
+    position: absolute;
+}
+
+.option .show-title {
+    display: flex;
+    font-weight: bold;
+    font-size: 1.05rem;
+    text-wrap: nowrap;
+}
+
+.option .separator {
+    display: flex;
+    justify-content: center;
+    padding: 0 1rem;
+}
+
+.option .show-name {
+    display: flex;
+    width: 50%;
+    flex-grow: 1;
+}
+
+.option .comic-title {
+    display: flex;
+    font-weight: bold;
+    font-size: 1.05rem;
+    flex-shrink: 1;
+}
+
+.option .comic-name {
+    display: flex;
+    width: 50%;
+    flex-grow: 1;
+}
+
+@media (max-width: 650px) {
+    .optionsContainer .optionList {
+        width: 80vw;
+    }    
+}

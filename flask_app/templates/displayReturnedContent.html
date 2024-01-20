@@ -1,0 +1,54 @@
+{% extends 'shared/layout.html' %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/displayReturnedContent.css') }}">
+{% endblock %}
+
+{% block extrajs %}
+<script src="{{ url_for('static', filename='js/displayReturnedContent.js') }}" defer></script>
+{% endblock %}
+
+{% block maincontent %}
+
+<!-- Display the success message at top of page -->
+<h1 class="success-message">{{success['message']}}</h1>
+
+<div class="content-column">
+    {% for img in img_data %}
+        <!-- Create a content column for image data -->
+        <!-- Determine the temporary filepath for the image to display -->
+        {% set filepath = url_for('static', filename=img['data']['file']|replace(' [Duplicate]', '')) %}
+
+        <div class="content-wrapper">
+            <!-- Set the correct source tag for images or videos -->
+            {% if img['data']['type'] == "image" %}
+                <img class="content" src="{{filepath}}" alt="{{success['alt']}}" loading="lazy">
+            {% elif img['data']['type'] == "video" %}
+                <video class="content" alt="{{success['alt']}}" loading="lazy" controls><source src="{{filepath}}"></video>
+            {% endif %}
+            
+            
+                <!-- Display content title if caption data doesn't exist, otherwise display caption data -->
+                {% if 'captions' not in img['data'] %}
+                    <h3 class="content-title">{{img['name']}}</h3>
+                {% else %}
+                <!-- Create column for displaying subtext -->
+                <div class="content-text-column">
+                    <!-- Loop through all captions associated with image and display them -->
+                    {% for caption in img['data']['captions'] %}
+                        <p class="content-caption">{{caption}}</p>
+
+                        <!-- Add horizontal bar between caption data -->
+                        {% if img['data']['captions']|length > loop.index %}
+                            <hr class="horizontal-line">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Button to repeat route -->
+<a class="performActionAgain" href="{{success['href']}}">{{success['button-text']}}</a>
+{% endblock %}
