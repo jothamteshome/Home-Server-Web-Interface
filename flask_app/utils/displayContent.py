@@ -244,6 +244,28 @@ def _collectShowContent(directory, search_dir):
     return valid_contents
 
 
+def _listThumbnails(thumbnailDir):
+    thumbnails = _tryListDir(thumbnailDir)
+
+    thumbnailDict = {}
+
+    for thumbnail in thumbnails:
+        thumbName = thumbnail.split(".")[0]
+
+        thumbnailDict[thumbName] = f"{thumbnailDir}\\{thumbnail}"
+
+    return thumbnailDict
+
+
+def _getThumbnail(thumbnails, showName):
+    if showName in thumbnails:
+        return thumbnails[showName]
+    elif showName not in thumbnails and thumbnails:
+        return thumbnails['removed']
+    else:
+        return None
+
+
 # Retrieves show content for listing purposes
 def retreiveShowContent(name, sorting):
     data = _openJSONDirectoriesFile()
@@ -251,12 +273,15 @@ def retreiveShowContent(name, sorting):
     SHOW_SUBDIRS = data['retrieve-show-content-dirs']['show-names-and-subdirs']
 
     content = []
+    thumbnails = {}
 
     for SHOW_DIR in SHOW_DIRS:
         subdirNames = SHOW_SUBDIRS[SHOW_DIR]
         
         if not subdirNames.get(name, False):
             continue
+
+        thumbnails = _listThumbnails(f"{SHOW_DIR}\\{subdirNames[name]['show-dir-path']}\\Thumbnails")
 
         for subdir in subdirNames[name]['show-subdirs']:
             full_dir = f"{SHOW_DIR}\\{subdirNames[name]['show-dir-path']}{subdir}"
@@ -270,14 +295,16 @@ def retreiveShowContent(name, sorting):
             title = show[0].split(" - ")
             name = " - ".join(title[1:])
             title = title[0]
+            thumbnail = _getThumbnail(thumbnails, title)
         else:
             title = ""
             name = show[0]
+            thumbnail = None
         
 
         dir_name = show[1].replace(f"{show[2]}\\", '').split("\\")[0]
 
-        returnableContent[show[0]] = {'name': name, 'title': title, 'loc': show[1], 'dirName': dir_name}
+        returnableContent[show[0]] = {'name': name, 'title': title, 'loc': show[1], 'dirName': dir_name, 'thumbnail': thumbnail}
 
     return returnableContent
 

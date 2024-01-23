@@ -79,9 +79,9 @@ class database:
             self.query(insert_statement, row)
 
     
-    def storeReturnData(self, searchName, itemName, itemLoc, itemProcessURL, itemDirName=None):
-        self.insertRows('returnData', ['searchName', 'itemName', 'itemSource', 'itemProcessURL', 'itemDirName'], 
-                        [[searchName, itemName, itemLoc, itemProcessURL, itemDirName]])
+    def storeReturnData(self, searchName, itemName, itemLoc, itemProcessURL, itemDirName=None, itemThumb=None):
+        self.insertRows('returnData', ['searchName', 'itemName', 'itemSource', 'itemProcessURL', 'itemDirName', 'itemThumb'], 
+                        [[searchName, itemName, itemLoc, itemProcessURL, itemDirName, itemThumb]])
 
     def getReturnData(self, searchName):
         returnData = self.query(f"SELECT * FROM returnData where searchName=%s", [searchName])

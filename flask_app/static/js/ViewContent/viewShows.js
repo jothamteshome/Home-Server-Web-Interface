@@ -16,7 +16,8 @@ const storeShowData = function (element) {
 
     const data = {
         'search_name': urlShowName, 'item_name': element.attributes.video_name,
-        'item_loc': element.attributes.source_loc, 'item_dir': element.attributes.dir_name, 'processURL': "/downloadTempShowContent"
+        'item_loc': element.attributes.source_loc, 'item_dir': element.attributes.dir_name, 
+        'item_thumb': element.attributes.thumb_loc,'processURL': "/downloadTempShowContent"
     };
 
     jQuery.ajax({
@@ -28,7 +29,7 @@ const storeShowData = function (element) {
 
 
 const getShowData = function (urlShowName) {
-    let data = { 'name': null, 'loc': null, 'item_dir': null, 'processURL': null };
+    let data = { 'name': null, 'loc': null, 'item_dir': null, 'processURL': null , 'thumb': null};
     jQuery.ajax({
         url: "/getReturnData",
         data: { 'search_name': urlShowName },
@@ -40,6 +41,7 @@ const getShowData = function (urlShowName) {
             data.loc = video_data.itemSource;
             data.processURL = video_data.itemProcessURL;
             data.item_dir = video_data.itemDirName;
+            data.thumb = video_data.itemThumb;
         }
     });
 
@@ -53,7 +55,7 @@ const saveTempVideo = function(e) {
 
     showLoadingWheel(`Preparing ${target.attributes.video_name}`)
 
-    var data = {'name': target.attributes.video_name, 'loc': target.attributes.source_loc};
+    var data = {'name': target.attributes.video_name, 'loc': target.attributes.source_loc, 'thumb': target.attributes.thumb_loc};
 
     jQuery.ajax({
         url: "/downloadTempShowContent",
@@ -80,6 +82,7 @@ const listShows = function(video_data) {
         list_element.classList.add('option');
         list_element.attributes['dir_name'] = video_data[vid].dirName;
         list_element.attributes['source_loc'] = video_data[vid].loc;
+        list_element.attributes['thumb_loc'] = video_data[vid].thumbnail;
         list_element.attributes['video_name'] = vid;
         list_element.href = `/viewShows#${b64EncodeUnicode(vid)}`;
         list_element.addEventListener('contextmenu', function () { storeShowData(list_element); });

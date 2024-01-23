@@ -15,37 +15,40 @@
 
 <div class="content-column">
     {% for img in img_data %}
-        <!-- Create a content column for image data -->
-        <!-- Determine the temporary filepath for the image to display -->
-        {% set filepath = url_for('static', filename=img['data']['file']|replace(' [Duplicate]', '')) %}
+    <!-- Create a content column for image data -->
+    <!-- Determine the temporary filepath for the image to display -->
+    {% set filepath = url_for('static', filename=img['data']['file']|replace(' [Duplicate]', '')) %}
+    {% set thumb_filepath = url_for('static', filename=img['data']['thumb'])%}
 
-        <div class="content-wrapper">
-            <!-- Set the correct source tag for images or videos -->
-            {% if img['data']['type'] == "image" %}
-                <img class="content" src="{{filepath}}" alt="{{success['alt']}}" loading="lazy">
-            {% elif img['data']['type'] == "video" %}
-                <video class="content" alt="{{success['alt']}}" loading="lazy" controls><source src="{{filepath}}"></video>
+    <div class="content-wrapper">
+        <!-- Set the correct source tag for images or videos -->
+        {% if img['data']['type'] == "image" %}
+        <img class="content" src="{{filepath}}" alt="{{success['alt']}}" loading="lazy">
+        {% elif img['data']['type'] == "video" %}
+        <video class="content" alt="{{success['alt']}}" loading="lazy" poster="{{thumb_filepath}}" controls>
+            <source src="{{filepath}}">
+        </video>
+        {% endif %}
+
+
+        <!-- Display content title if caption data doesn't exist, otherwise display caption data -->
+        {% if 'captions' not in img['data'] %}
+        <h3 class="content-title">{{img['name']}}</h3>
+        {% else %}
+        <!-- Create column for displaying subtext -->
+        <div class="content-text-column">
+            <!-- Loop through all captions associated with image and display them -->
+            {% for caption in img['data']['captions'] %}
+            <p class="content-caption">{{caption}}</p>
+
+            <!-- Add horizontal bar between caption data -->
+            {% if img['data']['captions']|length > loop.index %}
+            <hr class="horizontal-line">
             {% endif %}
-            
-            
-                <!-- Display content title if caption data doesn't exist, otherwise display caption data -->
-                {% if 'captions' not in img['data'] %}
-                    <h3 class="content-title">{{img['name']}}</h3>
-                {% else %}
-                <!-- Create column for displaying subtext -->
-                <div class="content-text-column">
-                    <!-- Loop through all captions associated with image and display them -->
-                    {% for caption in img['data']['captions'] %}
-                        <p class="content-caption">{{caption}}</p>
-
-                        <!-- Add horizontal bar between caption data -->
-                        {% if img['data']['captions']|length > loop.index %}
-                            <hr class="horizontal-line">
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                {% endif %}
+            {% endfor %}
         </div>
+        {% endif %}
+    </div>
     {% endfor %}
 </div>
 

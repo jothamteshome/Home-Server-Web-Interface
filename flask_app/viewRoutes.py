@@ -25,8 +25,9 @@ def storeReturnData():
     item_loc = form_fields['item_loc'].encode('utf-8')
     item_route = form_fields['processURL'].encode('utf-8')
     item_dir = form_fields['item_dir'].encode('utf-8')
+    item_thumb = form_fields['item_thumb'].encode('utf-8')
 
-    db.storeReturnData(search_name, item_name, item_loc, item_route, item_dir)
+    db.storeReturnData(search_name, item_name, item_loc, item_route, item_dir, item_thumb)
 
     return json.dumps({'success': 1})
 
@@ -144,9 +145,10 @@ def processShows():
 @clear_temp
 def downloadTempShowContent():
     form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-    name, source = form_fields['name'], form_fields['loc']
+    print(form_fields)
+    name, source, thumb = form_fields['name'], form_fields['loc'], form_fields['thumb']
 
-    _copyFilesToTemp([(f"{name}.mp4", source)])
+    _copyFilesToTemp([(f"{name}.mp4", source), (f"{name}.jpg", thumb)])
 
     return json.dumps({})
 
@@ -156,7 +158,8 @@ def downloadTempShowContent():
 @login_required
 def streamShows(showName, contentName):
     contentName = base64.urlsafe_b64decode(contentName).decode('utf-8')
-    img_data = [{'name': contentName, 'data': {'file': f"{_tempDirectory(True)}/{contentName}.mp4", 'type': 'video'}}]
+    img_data = [{'name': contentName, 'data': {'file': f"{_tempDirectory(True)}/{contentName}.mp4", 
+                                               'thumb': f"{_tempDirectory(True)}/{contentName}.jpg", 'type': 'video'}}]
 
     success_data = {'message': f"Currently viewing {showName} content", 
                     'alt': f"Image from {showName}",

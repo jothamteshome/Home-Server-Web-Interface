@@ -9,7 +9,7 @@ const storeComicData = function (element) {
 
     const data = {
         'search_name': urlComicName, 'item_name': element.attributes.comic,
-        'item_loc': element.attributes.source_loc, 'item_dir': null
+        'item_loc': element.attributes.source_loc, 'item_dir': null, 'item_thumb': null
     };
 
     if (element.attributes.is_series) {
