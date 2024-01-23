@@ -145,10 +145,15 @@ def processShows():
 @clear_temp
 def downloadTempShowContent():
     form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-    print(form_fields)
     name, source, thumb = form_fields['name'], form_fields['loc'], form_fields['thumb']
 
-    _copyFilesToTemp([(f"{name}.mp4", source), (f"{name}.jpg", thumb)])
+    filesToDownload = [(f"{name}.mp4", source)]
+
+    if thumb:
+        filesToDownload.append((f"{name}.jpg", thumb))
+
+    _copyFilesToTemp(filesToDownload)
+    
 
     return json.dumps({})
 
