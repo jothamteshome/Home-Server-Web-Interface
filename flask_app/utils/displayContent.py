@@ -357,7 +357,7 @@ def pullShortformContent(name, directory, displayed, resetFile, sorting, videosF
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
 
-    SUBDIRS = ["\\Images", "\\Videos"]
+    SUBDIRS = ["\\Images", "\\Scraped Content", "\\Videos"]
 
     if videosFirst:
         SUBDIRS.reverse()
