@@ -195,4 +195,3 @@ window.addEventListener('load', function () {
 })
 
 window.addEventListener('pageshow', showsPageOnShow);
-window.addEventListener('hashchange', showsPageOnShow);
