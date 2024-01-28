@@ -224,22 +224,31 @@ def _listShows():
         showData.append({"name": f"--- {search_dir_name} ---", 'disabled': True})
         search_valid = []
 
-        for show in data['retrieve-show-content-dirs']['show-names-and-subdirs'][search_dir]:
-            search_valid.append({'name': show, 'data': json.dumps({'name': show})})
+        shows = [movie_directory for movie_directory in os.walk(search_dir) if movie_directory[0].split("\\")[-1] == "Movie Content"]
+
+        for show_dir in shows:
+            show = show_dir[0].replace("\\Movie Content", "").split("\\")[-1]
+            search_valid.append({'name': show, 'data': json.dumps({'name': show, 'show-dir-path': show_dir[0]})})
         
         showData.extend(sorted(search_valid, key=lambda x: x['name']))
+
+    showData.append({'name': "--- Extra Content ---", 'disabled': True})
+
+    for show_dir in data['retrieve-show-content-dirs']['extra-directories']:
+        show = show_dir.split("\\")[-1]
+        showData.append({'name': show, 'data': json.dumps({'name': show, 'show-dir-path': show_dir})})
 
     return showData
 
 
 # Collect valid show names and directories
-def _collectShowContent(directory, search_dir):
+def _collectShowContent(directory):
     valid_contents = []
     for content in _tryListDir(directory):
         show_name = content.replace(".mp4", "")
 
         if ".mp4" in content:
-            valid_contents.append((show_name, f"{directory}\\{content}", search_dir))
+            valid_contents.append((show_name, f"{directory}\\{content}"))
 
     return valid_contents
 
@@ -257,37 +266,33 @@ def _listThumbnails(thumbnailDir):
     return thumbnailDict
 
 
-def _getThumbnail(thumbnails, showName):
-    if showName in thumbnails:
-        return thumbnails[showName]
-    elif showName not in thumbnails and thumbnails:
-        return thumbnails['removed']
+def _getThumbnail(thumbnails, showTitle):
+    if showTitle in thumbnails:
+        return thumbnails[showTitle]
     else:
         return None
 
 
 # Retrieves show content for listing purposes
-def retreiveShowContent(name, sorting):
+def retreiveShowContent(name, show_dir_path, sorting):
     data = _openJSONDirectoriesFile()
-    SHOW_DIRS = data['retrieve-show-content-dirs']['search-directories']
-    SHOW_SUBDIRS = data['retrieve-show-content-dirs']['show-names-and-subdirs']
+    SHOW_SUBDIRS = data['retrieve-show-content-dirs']['show-subdirs']
 
     content = []
-    thumbnails = {}
 
-    for SHOW_DIR in SHOW_DIRS:
-        subdirNames = SHOW_SUBDIRS[SHOW_DIR]
-        
-        if not subdirNames.get(name, False):
-            continue
+    if name in SHOW_SUBDIRS:
+        subdirNames = SHOW_SUBDIRS[name]
 
-        thumbnails = _listThumbnails(f"{SHOW_DIR}\\{subdirNames[name]['show-dir-path']}\\Thumbnails")
+        for subdir in subdirNames:
+            full_dir = f"{show_dir_path}{subdir}"
+            content.extend(_collectShowContent(full_dir))
 
-        for subdir in subdirNames[name]['show-subdirs']:
-            full_dir = f"{SHOW_DIR}\\{subdirNames[name]['show-dir-path']}{subdir}"
-            content.extend(_collectShowContent(full_dir, SHOW_DIR))
+    content.extend(_collectShowContent(show_dir_path))
+
+    thumbnails = _listThumbnails(f"{show_dir_path}\\Thumbnails")
     
     content = _sortStyle(content, sorting)
+    dir_name = show_dir_path.replace("\\Movie Content", "").split("\\")[-1]
 
     returnableContent = {}
     for show in content:
@@ -300,9 +305,6 @@ def retreiveShowContent(name, sorting):
             title = ""
             name = show[0]
             thumbnail = None
-        
-
-        dir_name = show[1].replace(f"{show[2]}\\", '').split("\\")[0]
 
         returnableContent[show[0]] = {'name': name, 'title': title, 'loc': show[1], 'dirName': dir_name, 'thumbnail': thumbnail}
 

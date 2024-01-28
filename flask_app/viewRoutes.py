@@ -133,9 +133,10 @@ def viewShows():
 def processShows():
     form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
     name = form_fields['name']
+    show_dir_path = form_fields['show-dir-path']
     sorting = form_fields['sorting'].strip().lower()
 
-    content = retreiveShowContent(name, sorting)
+    content = retreiveShowContent(name, show_dir_path, sorting)
     return json.dumps(content)
 
 
