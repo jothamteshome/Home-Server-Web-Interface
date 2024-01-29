@@ -4,9 +4,10 @@ import random
 import json
 import os
 import re
+import time
 
 from functools import cmp_to_key
-from flask_app.utils.globalUtils import _openJSONDirectoriesFile
+from flask_app.utils.globalUtils import _openJSONDirectoriesFile, current_app as app, _showDataFile
 from flask_app.utils.globalUtils import _tempDirectory, _tryListDir, _dataBatchesFile, _tryRemoveFile, winsort
 
 BATCHED_SEND_COUNT = 16
@@ -212,9 +213,27 @@ def collectComicSeries(name, directory):
 #                   SHOW CONTENT HANDLING                          #
 ####################################################################
 
+def _writeShowDataToJSON(showData):
+    with open(_showDataFile(), 'w') as jsonFile:
+        json.dump({'show-data': showData}, jsonFile)
+
+
+def _loadShowData():
+    with open(_showDataFile(), 'r') as jsonFile:
+        showData = json.load(jsonFile)['show-data']
+
+        return showData
 
 # List stored shows and movies
 def _listShows():
+    # If time since last show data update is less than 30 minutes and show data json file exists, load previous data
+    # otherwise perform os walk for updated data
+    if (time.perf_counter() - app.showDataRefresh) < 1800 \
+        and _showDataFile(name_only=True) in _tryListDir(_showDataFile(dir_only=True)):
+
+        return _loadShowData()
+    
+    app.showDataRefresh = time.perf_counter()
     data = _openJSONDirectoriesFile()
 
     showData = []
@@ -237,6 +256,8 @@ def _listShows():
     for show_dir in data['retrieve-show-content-dirs']['extra-directories']:
         show = show_dir.split("\\")[-1]
         showData.append({'name': show, 'data': json.dumps({'name': show, 'show-dir-path': show_dir})})
+
+    _writeShowDataToJSON(showData)
 
     return showData
 

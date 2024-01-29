@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask
 from flask_failsafe import failsafe
 from flask_app.utils.PropertiesReader import PropertiesReader
@@ -22,6 +24,8 @@ def create_app():
 	db.createUser(user=admin_user, password=admin_pass, role='admin')
 
 	app.secret_key = 'AKWNF1231082fksejfOSEHFOISEHF24142124124124124iesfhsoijsopdjf'
+
+	app.showDataRefresh = time.perf_counter()
 
 	with app.app_context():
 		from . import routes

@@ -2,7 +2,7 @@ import json
 import os
 
 from ctypes import wintypes, windll
-from flask import session
+from flask import session, current_app
 
 # Opens json file containing directories
 def _openJSONDirectoriesFile():
@@ -37,6 +37,21 @@ def _tempDirectory(folder_only=False):
 # Get user's data batch directory
 def _dataBatchesFile(name_only=False, dir_only=False):
     filename = f"{_tempDirectory(True)}-data_batches.json"
+
+    directory = f"flask_app\\static\\UserDataBatches"
+
+    fullPath = f"{directory}\\{filename}"
+
+    if name_only and not dir_only:
+        return filename
+    elif dir_only and not name_only:
+        return directory
+    
+    return fullPath
+
+
+def _showDataFile(name_only=False, dir_only=False):
+    filename = f"{_tempDirectory(True)}-show_data.json"
 
     directory = f"flask_app\\static\\UserDataBatches"
 
