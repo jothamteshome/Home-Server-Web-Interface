@@ -157,6 +157,10 @@ const displayOptions = function (comic_data, optionName) {
         list_element.attributes['is_series'] = comic_data[comic].series;
         list_element.attributes['comic'] = comic;
 
+        const list_element_text = document.createElement('div');
+        list_element_text.classList.add('optionText');
+        list_element.appendChild(list_element_text);
+
         let urlComicName = joinComicName(comic);
         if (comic_data[comic].series) { urlComicName = urlComicName + '-Series'; }
 
@@ -171,21 +175,21 @@ const displayOptions = function (comic_data, optionName) {
         link_title.textContent = comic_author;
         link_title.classList.add('comic-title');
 
-        if (comic_author) { list_element.appendChild(link_title); }
+        if (comic_author) { list_element_text.appendChild(link_title); }
 
 
         if (comic_author && comic) {
             const separator = document.createElement("h2");
             separator.classList.add("separator");
             separator.textContent = "-";
-            list_element.appendChild(separator);
+            list_element_text.appendChild(separator);
         }
 
         // Add link name
         const link_name = document.createElement('span');
         link_name.textContent = comic;
         link_name.classList.add('comic-name');
-        list_element.appendChild(link_name);
+        list_element_text.appendChild(link_name);
 
         list.appendChild(list_element);
 

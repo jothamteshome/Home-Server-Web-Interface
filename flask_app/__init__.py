@@ -26,6 +26,7 @@ def create_app():
 	app.secret_key = 'AKWNF1231082fksejfOSEHFOISEHF24142124124124124iesfhsoijsopdjf'
 
 	app.showDataRefresh = time.perf_counter()
+	app.showsStartup = True
 
 	with app.app_context():
 		from . import routes

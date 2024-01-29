@@ -17,7 +17,8 @@
 
 .optionList .option {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     width: 100%;
     min-height: 3em;
     height: fit-content;
@@ -38,40 +39,44 @@
     scale: 1.1;
 }
 
-.option .click-box {
-    background-color: #000000;
-    opacity: 1;
-    z-index: 3;
-    position: absolute;
+.option .optionThumb {
+    max-width: 100%;
 }
 
-.option .show-title {
+.option .optionText {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+}
+
+.optionText .show-title {
     display: flex;
     font-weight: bold;
     font-size: 1.05rem;
     text-wrap: nowrap;
 }
 
-.option .separator {
+.optionText .separator {
     display: flex;
     justify-content: center;
     padding: 0 1rem;
 }
 
-.option .show-name {
+.optionText .show-name {
     display: flex;
     width: 50%;
     flex-grow: 1;
 }
 
-.option .comic-title {
+.optionText .comic-title {
     display: flex;
     font-weight: bold;
     font-size: 1.05rem;
     flex-shrink: 1;
 }
 
-.option .comic-name {
+.optionText .comic-name {
     display: flex;
     width: 50%;
     flex-grow: 1;

@@ -229,7 +229,7 @@ def _listShows():
     # If time since last show data update is less than 30 minutes and show data json file exists, load previous data
     # otherwise perform os walk for updated data
     if (time.perf_counter() - app.showDataRefresh) < 1800 \
-        and _showDataFile(name_only=True) in _tryListDir(_showDataFile(dir_only=True)):
+        and _showDataFile(name_only=True) in _tryListDir(_showDataFile(dir_only=True)) and not app.showsStartup:
 
         return _loadShowData()
     
@@ -258,6 +258,7 @@ def _listShows():
         showData.append({'name': show, 'data': json.dumps({'name': show, 'show-dir-path': show_dir})})
 
     _writeShowDataToJSON(showData)
+    app.showsStartup = False
 
     return showData
 
@@ -316,18 +317,26 @@ def retreiveShowContent(name, show_dir_path, sorting):
     dir_name = show_dir_path.replace("\\Movie Content", "").split("\\")[-1]
 
     returnableContent = {}
+    tempThumbnails = []
     for show in content:
         if " - " in show[0]:
             title = show[0].split(" - ")
             name = " - ".join(title[1:])
             title = title[0]
             thumbnail = _getThumbnail(thumbnails, title)
+
+            if thumbnail:
+                tempThumbnails.append((f"{show[0]}.jpg", thumbnail))
+
         else:
             title = ""
             name = show[0]
             thumbnail = None
 
-        returnableContent[show[0]] = {'name': name, 'title': title, 'loc': show[1], 'dirName': dir_name, 'thumbnail': thumbnail}
+        returnableContent[show[0]] = {'name': name, 'title': title, 'loc': show[1], 'dirName': dir_name, 'thumbnail': thumbnail,
+                                      'tempDir': f"{_tempDirectory(True)}"}
+
+    _copyFilesToTemp(tempThumbnails)
 
     return returnableContent
 

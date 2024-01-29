@@ -86,32 +86,43 @@ const listShows = function(video_data) {
         list_element.attributes['video_name'] = vid;
         list_element.href = `/viewShows#${b64EncodeUnicode(vid)}`;
         list_element.addEventListener('contextmenu', function () { storeShowData(list_element); });
+        
+        if (video_data[vid].thumbnail) {
+            const thumbnail = document.createElement('img');
+            thumbnail.classList.add('optionThumb');
+            thumbnail.src = `/static/${video_data[vid].tempDir}/${vid}.jpg`;
+            thumbnail.loading = 'lazy';
+            thumbnail.alt = `Thumbnail for ${vid}`;
+
+            list_element.appendChild(thumbnail);
+        }
+
+        const list_element_text = document.createElement('div');
+        list_element_text.classList.add('optionText');
+        list_element.appendChild(list_element_text);
 
         // Create link element
         let video_title = video_data[vid].title;
-        // link.classList.add('optionLink');
 
         // Create link title
         const link_title = document.createElement('span');
         link_title.textContent = video_title;
         link_title.classList.add('show-title');
 
-        if (video_title) { list_element.appendChild(link_title); }
+        if (video_title) { list_element_text.appendChild(link_title); }
 
         if (video_title && video_data[vid].name) {
             const separator = document.createElement("h2");
             separator.classList.add("separator");
             separator.textContent = "-";
-            list_element.appendChild(separator);
+            list_element_text.appendChild(separator);
         }
 
         // Add link name
         const link_name = document.createElement('span');
         link_name.textContent = video_data[vid].name;
         link_name.classList.add('show-name');
-        list_element.appendChild(link_name);
-
-        // list_element.appendChild(link);
+        list_element_text.appendChild(link_name);
         
         list.appendChild(list_element);
 

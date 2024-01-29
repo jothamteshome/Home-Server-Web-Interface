@@ -20,7 +20,7 @@ db = database()
 @app.route('/storeReturnData', methods=['POST'])
 def storeReturnData():
     form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-    search_name = form_fields['search_name'].encode('utf-8')
+    search_name = form_fields['search_name'][:64].encode('utf-8')
     item_name = form_fields['item_name'].encode('utf-8')
     item_loc = form_fields['item_loc'].encode('utf-8')
     item_route = form_fields['processURL'].encode('utf-8')
@@ -35,7 +35,7 @@ def storeReturnData():
 @app.route('/getReturnData', methods=['POST'])
 def getReturnData():
     form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-    search_name = form_fields['search_name']
+    search_name = form_fields['search_name'][:64]
 
     returned = db.getReturnData(search_name)[0]
     for row in returned:
