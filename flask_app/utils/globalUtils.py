@@ -51,9 +51,9 @@ def _dataBatchesFile(name_only=False, dir_only=False):
 
 
 def _showDataFile(name_only=False, dir_only=False):
-    filename = f"{_tempDirectory(True)}-show_data.json"
+    filename = "show_data.json"
 
-    directory = f"flask_app\\static\\UserDataBatches"
+    directory = f"flask_app\\utils\\HelperFiles"
 
     fullPath = f"{directory}\\{filename}"
 

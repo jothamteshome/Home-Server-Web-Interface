@@ -242,12 +242,16 @@ def _listShows():
         search_dir_name = search_dir.split("\\")[-1]
         showData.append({"name": f"--- {search_dir_name} ---", 'disabled': True})
         search_valid = []
+        shows = []
 
-        shows = [movie_directory for movie_directory in os.walk(search_dir) if movie_directory[0].split("\\")[-1] == "Movie Content"]
+        for movie_directory in _tryListDir(search_dir):
+            movie_dir_path = f"{search_dir}\\{movie_directory}"
+            if "Movie Content" in _tryListDir(movie_dir_path):
+                shows.append(f"{movie_dir_path}\\Movie Content")
 
         for show_dir in shows:
-            show = show_dir[0].replace("\\Movie Content", "").split("\\")[-1]
-            search_valid.append({'name': show, 'data': json.dumps({'name': show, 'show-dir-path': show_dir[0]})})
+            show = show_dir.replace("\\Movie Content", "").split("\\")[-1]
+            search_valid.append({'name': show, 'data': json.dumps({'name': show, 'show-dir-path': show_dir})})
         
         showData.extend(sorted(search_valid, key=lambda x: x['name']))
 
