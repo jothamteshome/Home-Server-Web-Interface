@@ -59,6 +59,8 @@ const setImageSizes = function () {
         let zoomedIn = portraitView;
         setContentSize(content, zoomedIn);
 
+        if (content.getAttribute('do-loop')) { content.loop = true; }
+
         if (window.location.href.search('/viewShows') === -1 && !portraitView) { 
             content.style.cursor = "zoom-in";
             content.attributes['zoomedIn'] = false;

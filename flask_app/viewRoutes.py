@@ -214,7 +214,7 @@ def singleShortformContent(name, contentName):
 
     success_data = {'message': f"Currently viewing {name} content", 
                     'alt': f"Image from {name}",
-                    'href': "/viewShortformContent", 'button-text': "View More Images"}
+                    'href': "/viewShortformContent", 'button-text': "View More Images", 'loop': True}
     
     return render_template('displayReturnedContent.html', img_data=img_data, success=success_data)
 
@@ -259,7 +259,7 @@ def singlePremadeMeme(name, contentName):
 
     success_data = {'message': f"Currently viewing {name} content", 
                     'alt': f"Meme by {name}",
-                    'href': "/viewPremadeMemes", 'button-text': "View More Memes"}
+                    'href': "/viewPremadeMemes", 'button-text': "View More Memes", 'loop': True}
     
     return render_template('displayReturnedContent.html', img_data=img_data, success=success_data)
 

@@ -23,9 +23,14 @@
     <div class="content-wrapper">
         <!-- Set the correct source tag for images or videos -->
         {% if img['data']['type'] == "image" %}
-        <img class="content" src="{{filepath}}" alt="{{success['alt']}}" loading="lazy">
+        <img class="content" src="{{filepath}}" alt="{{success['alt']}}" loading="lazy" do-loop="{{success.get('loop', False)}}">
         {% elif img['data']['type'] == "video" %}
-        <video class="content" alt="{{success['alt']}}" loading="lazy" poster="{{thumb_filepath}}" controls>
+
+        {% if img.get('data', {}).get('thumb', False) %}
+            <video class="content" alt="{{success['alt']}}" loading="lazy" poster="{{thumb_filepath}}" controls do-loop="{{success.get('loop', False)}}"></video>
+        {% else %}
+            <video class="content" alt="{{success['alt']}}" loading="lazy" controls do-loop="{{success.get('loop', False)}}">
+        {% endif %}
             <source src="{{filepath}}">
         </video>
         {% endif %}
