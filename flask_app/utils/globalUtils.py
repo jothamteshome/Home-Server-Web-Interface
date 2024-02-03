@@ -25,6 +25,31 @@ def _deleteTempDirectory():
     except (OSError, PermissionError):
         pass
 
+
+def _deleteUserDataBatches():
+    try:
+        for file in _tryListDir("flask_app/static/UserDataBatches"):
+            os.remove(f"flask_app/static/UserDataBatches/{file}")
+    except (OSError, PermissionError):
+        pass
+
+
+def _deleteAllTempDirectores():
+    static_dir = "flask_app/static"
+
+    try:
+        for directory in _tryListDir(static_dir):
+            if os.path.isdir(f"{static_dir}/{directory}") and "Temp-" in directory:
+                for subdir in os.walk(f"{static_dir}/{directory}", topdown=False):
+                    for file in subdir[2]:
+                        os.remove(f"{subdir[0]}\\{file}")
+                    
+                    os.rmdir(subdir[0])
+
+    except (OSError, PermissionError):
+        pass
+
+
 # Get user's temp directory
 def _tempDirectory(folder_only=False):
     tempFolder = f"Temp-{session['user_info']['username']}"
