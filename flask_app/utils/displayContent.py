@@ -7,8 +7,10 @@ import re
 import time
 
 from functools import cmp_to_key
+from flask_app.utils.database import database
 from flask_app.utils.globalUtils import _openJSONDirectoriesFile, current_app as app, _showDataFile
 from flask_app.utils.globalUtils import _tempDirectory, _tryListDir, _dataBatchesFile, _tryRemoveFile, winsort
+db = database()
 
 BATCHED_SEND_COUNT = 16
 
@@ -133,14 +135,39 @@ def _handleBatch(file_data, altText):
 
 
 def _sortComics(fileDict, sorting):
+    tempAuthorSort = dict(sorted(fileDict.items(), key=lambda x: x[1]['author']))
+    tempTitleSort = dict(sorted(fileDict.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0]))))
+
     if sorting == "author":
-        return dict(sorted(fileDict.items(), key=lambda x: x[1]['author']))
+        return dict(sorted(tempTitleSort.items(), key=lambda x: x[1]['author']))
     elif sorting == "author-reverse":
-        return dict(sorted(fileDict.items(), key=lambda x: x[1]['author'], reverse=True))
+        return dict(sorted(tempTitleSort.items(), key=lambda x: x[1]['author'], reverse=True))
     elif sorting == "z-a":
-        return dict(sorted(fileDict.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0])), reverse=True))
+        return dict(sorted(tempAuthorSort.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0])), reverse=True))
     else:
-        return dict(sorted(fileDict.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0]))))
+        return dict(sorted(tempAuthorSort.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0]))))
+
+def _decodeComicData(data):
+    convertFunc = {'comic_id': str, 'has_chapters': int}
+
+    for column in data:
+        data[column] = data[column].decode('utf-8') if column not in convertFunc else convertFunc[column](data[column])
+
+    return data
+
+
+def _handleDisplayingComic(comic_id):
+    comicData = _decodeComicData(db.getComic(comic_id))
+    comic = []
+
+    loc = comicData['comic_loc']
+
+    for page in os.listdir(loc):
+        comic.append((page, f"{loc}\\{page}"))
+
+    _copyFilesToTemp(comic, comic_id)
+
+    return comicData
 
 
 def _listComicNames():
@@ -156,7 +183,7 @@ def _listComicNames():
             subgenre_comics = []
             for file in os.listdir(f"{search_dir['main-dir']}{subgenre}"):
                 if os.listdir(f"{search_dir['main-dir']}{subgenre}\\{file}"):
-                    subgenre_comics.append({'name': file, 'data': json.dumps({'name': file, 'optionPath': f"{search_dir['main-dir']}{subgenre}\\{file}"})})
+                    subgenre_comics.append({'name': file, 'data': json.dumps({'name': "__".join(file.split(" ")), 'optionPath': f"{search_dir['main-dir']}{subgenre}\\{file}"})})
 
             comicData.extend(sorted(subgenre_comics, key=lambda x: x['name']))
     
@@ -164,46 +191,41 @@ def _listComicNames():
     return comicData
 
 
-def collectComics(directory, sorting):
-    comicContents = {'name': directory.split("\\")[-1], 'data': {}}
+def collectComics(franchise_name, sorting):
+    comicContents = {'name': franchise_name.strip(), 'data': {}}
 
-    for comic in os.listdir(directory):
-        dirContents = list(os.walk(f"{directory}\\{comic}"))[0]
+    comicData = db.query('SELECT * FROM comicData WHERE comic_franchise=%s AND comic_series=%s', [comicContents['name'], ""])
 
-        match = re.search("\[(.*?)\]", comic)
-        author = ""
-        
-        if match:
-            author = comic[match.start():match.end()]
+    for i, row in enumerate(comicData):
+        comicData[i] = _decodeComicData(row)
 
-        title = comic.replace(f"{author}", "").strip()
+        id = row['comic_id']
+        name = comicData[i]['comic_name']
+        author = comicData[i]['comic_author']
+        series = comicData[i]['has_chapters']
+        title = name.replace(f"{author}", "").strip()
 
-        if dirContents[1] or dirContents[2]:
-            comicContents['data'][title] = {'name': title, 'loc': dirContents[0], 'series': len(dirContents[1]) > 0, 'author': author}
+        comicContents['data'][title] = {'id': id, 'name': title, 'author': author, 'has_chapters': series}
 
     comicContents['data'] = _sortComics(comicContents['data'], sorting)
 
     return comicContents
 
 
-def collectComicSeries(name, directory):
+def collectComicSeries(seriesData):
     comicSeriesContents = {'data': {}}
 
-    for comic in os.listdir(directory):
-        dirContents = list(os.walk(f"{directory}\\{comic}"))[0]
+    for i, row in enumerate(seriesData):
+        seriesData[i] = _decodeComicData(row)
 
-        match = re.search("\[(.*?)\]", comic)
-        author = ""
-        
-        if match:
-            author = comic[match.start():match.end()]
+        id = row['comic_id']
+        name = seriesData[i]['comic_name']
+        author = seriesData[i]['comic_author']
 
-        title = comic.replace(f"{author}", "").strip()
+    
+        comicSeriesContents['data'][name] = {'id': id, 'name': name, 'author': author}
 
-        if dirContents[2]:
-            comicSeriesContents['data'][comic] = {'name': name, 'loc': dirContents[0], 'author': author, 'title': title}
-
-    comicSeriesContents['name'] = name
+    comicSeriesContents['name'] = seriesData[i]['comic_series'].replace(author, "").strip()
     comicSeriesContents['data'] = _sortComics(comicSeriesContents['data'], None)
 
     return comicSeriesContents

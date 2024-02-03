@@ -5,7 +5,9 @@ from flask import current_app as app
 from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template
 from flask_app.utils.globalUtils import _tempDirectory
-from flask_app.utils.displayContent import  collectComics, collectComicSeries, _copyFilesToTemp, _listComicNames
+from flask_app.utils.displayContent import  collectComics, collectComicSeries, _copyFilesToTemp, _listComicNames, _decodeComicData, _handleDisplayingComic
+from flask_app.utils.database import database
+db = database()
 
 
 @app.route('/viewComics')
@@ -26,46 +28,44 @@ def processComics():
     return json.dumps(content)
 
 
-@app.route('/processComicSeries', methods=['POST'])
+@app.route('/optionData/<franchise_name>/<sorting>', methods=['POST'])
 @login_required
-def processComicSeries():
-    form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-    name = form_fields['name']
-    loc = form_fields['loc']
+def getOptionData(franchise_name, sorting):
+    return json.dumps(collectComics(" ".join(franchise_name.split("__")), sorting.strip().lower()))
 
-    content = collectComicSeries(name, loc)
-    return json.dumps(content)
+@app.route('/optionData/<series_id>', methods=['POST'])
+def getSeriesData(series_id):
+    comicData = _decodeComicData(db.getComic(series_id))
+    seriesData = db.query('SELECT * FROM comicData WHERE comic_series=%s', [comicData['comic_name']])
+
+    return json.dumps(collectComicSeries(seriesData))
 
 
-@app.route('/downloadComic', methods=['POST'])
+@app.route('/viewComics/Standalone/<comic_id>')
 @login_required
-def downloadComic():
-    form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-    subdir = form_fields['name']
-    loc = form_fields['loc']
-
-    comic = []
-
-    for page in os.listdir(loc):
-        comic.append((page, f"{loc}\\{page}"))
-
-    _copyFilesToTemp(comic, subdir)
-
-    return json.dumps({})
-
-
-@app.route('/viewComics/<comicName>')
-@login_required
-def displayComics(comicName):
+def displayComic(comic_id):
+    comicData = _handleDisplayingComic(comic_id)
     img_data = []
 
-    for file in os.listdir(f"{_tempDirectory()}\\{comicName}"):
-        img_data.append({'name': file, 'data': {'file': f"{_tempDirectory(True)}/{comicName}/{file}", 'type': 'image'}})
+    for file in os.listdir(f"{_tempDirectory()}\\{comic_id}"):
+        img_data.append({'name': file, 'data': {'file': f"{_tempDirectory(True)}/{comic_id}/{file}", 'type': 'image'}})
 
-    comicName = " ".join(comicName.split("_")).title()
+    comicName = comicData['comic_name'].replace(comicData['comic_author'], "").strip()
 
     success_data = {'message': f"Currently viewing: {comicName}", 
                     'alt': f"{comicName} comic page",
                     'href': "/viewComics", 'button-text': "View More Comics"}
     
     return render_template('displayReturnedContent.html', img_data=img_data, success=success_data)
+
+
+@app.route('/viewComics/Series/<series_id>')
+@login_required
+def displaySeries(series_id):
+    return render_template('viewContent/viewComicOptions.html')
+
+
+@app.route('/viewComics/Options/<franchise_name>/<sorting>')
+@login_required
+def displayFranchiseOptions(franchise_name, sorting):
+    return render_template('viewContent/viewComicOptions.html')

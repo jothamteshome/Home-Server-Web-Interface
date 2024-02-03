@@ -1,0 +1,10 @@
+{% extends 'viewContent/view.html' %}
+
+{% block viewCSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/viewOptions.css') }}">
+{% endblock %}
+
+{% block viewJS %}
+<script src="{{ url_for('static', filename='js/ViewContent/viewComics.js')}}" defer></script>
+<script src="{{ url_for('static', filename='js/ViewContent/viewComicOptions.js')}}" defer></script>
+{% endblock %}

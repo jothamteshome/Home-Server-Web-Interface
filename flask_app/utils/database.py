@@ -55,7 +55,7 @@ class database:
 
     def createTables(self, purge=False, data_path='flask_app/database/'):
         # Create new tables
-        tables = {"users": "purge", 'returnData': "purge"}
+        tables = {"users": "purge", 'returnData': "purge", 'comicData': None}
 
         for table in tables:
             if purge and tables[table] == "purge":
@@ -77,6 +77,18 @@ class database:
         # Replace all instances of "NULL" with None then run query
         for row in parameters:
             self.query(insert_statement, row)
+
+    
+    def storeComic(self, comic_id, comic_name, comic_franchise, comic_author, comic_loc, comic_series="", has_chapters=0):
+        self.insertRows('comicData', 
+                        ['comic_id', 'comic_name', 'comic_franchise', 'comic_series', 'has_chapters', 'comic_author', 'comic_loc'], 
+                        [[comic_id, comic_name.encode('utf-8'), comic_franchise.encode('utf-8'), comic_series.encode('utf-8'), 
+                          has_chapters, comic_author.encode('utf-8'), comic_loc.encode('utf-8')]])
+
+    def getComic(self, comic_id):
+        comicData = self.query("SELECT * FROM comicData where comic_id=%s", [comic_id])
+
+        return comicData[0]
 
     
     def storeReturnData(self, searchName, itemName, itemLoc, itemProcessURL, itemDirName=None, itemThumb=None):

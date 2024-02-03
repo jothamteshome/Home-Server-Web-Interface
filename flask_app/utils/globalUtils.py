@@ -1,8 +1,11 @@
 import json
 import os
+import re
 
 from ctypes import wintypes, windll
 from flask import session, current_app
+from flask_app.utils.database import database
+db = database()
 
 # Opens json file containing directories
 def _openJSONDirectoriesFile():
@@ -87,3 +90,38 @@ def winsort():
     _StrCmpLogicalW.restype = wintypes.INT
 
     return _StrCmpLogicalW
+
+
+def _addComicsToDatabase():
+    data = _openJSONDirectoriesFile()
+
+    for search_dir in data['retrieve-comic-content-dirs']['search-directories']:
+        for subgenre in search_dir['sub-genres']:
+            subgenre_dir = f"{search_dir['main-dir']}{subgenre}"
+
+            for franchise in _tryListDir(subgenre_dir):
+                franchise_dir = f"{subgenre_dir}\\{franchise}"
+
+                for comic in _tryListDir(franchise_dir):
+                    comic_loc = f"{franchise_dir}\\{comic}"
+                    dirContents = list(os.walk(comic_loc))[0]
+
+                    if not dirContents[1] and not dirContents[2]:
+                        continue
+
+                    match = re.search("\[(.*?)\]", comic)
+                    author = ""
+                    
+                    if match:
+                        author = comic[match.start():match.end()]
+
+                    has_chapters = 0
+                    if len(dirContents[1]) > 0:
+                        has_chapters = 1
+                        for comic_part in dirContents[1]:
+                            comic_part_loc = f"{dirContents[0]}\\{comic_part}"
+                            db.storeComic(comic_id=hash(comic_part_loc), comic_name=comic_part, comic_franchise=franchise, 
+                                          comic_series=comic, comic_author=author, comic_loc=comic_part_loc, has_chapters=0)
+                            
+                    db.storeComic(comic_id=hash(comic_loc), comic_name=comic, comic_franchise=franchise, 
+                                      comic_author=author, comic_loc=comic_loc, has_chapters=has_chapters)

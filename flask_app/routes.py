@@ -3,7 +3,7 @@ import json
 from flask import current_app as app
 from flask import redirect, request, session
 from flask_app import uploadRoutes, viewRoutes
-from flask_app.utils.globalUtils import _tryRemoveFile, _dataBatchesFile
+from flask_app.utils.globalUtils import _tryRemoveFile, _dataBatchesFile, _addComicsToDatabase
 from flask_app.routeTools import clear_temp, render_template
 from flask_app.utils.database  import database
 db = database()
@@ -59,3 +59,8 @@ def root():
 @clear_temp
 def home():
     return redirect('/')
+
+@app.route('/populateComicsDatabase', methods=['POST'])
+def populateComicsDatabase():
+    _addComicsToDatabase()
+    return json.dumps({})
