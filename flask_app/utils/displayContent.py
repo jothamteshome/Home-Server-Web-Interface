@@ -194,7 +194,7 @@ def _listComicNames():
 def collectComics(franchise_name, sorting):
     comicContents = {'name': franchise_name.strip(), 'data': {}}
 
-    comicData = db.query('SELECT * FROM comicData WHERE comic_franchise=%s AND comic_series=%s', [comicContents['name'], ""])
+    comicData = db.query('SELECT * FROM comicData WHERE comic_franchise=%s AND comic_series=%s', [franchise_name.strip(), ""])
 
     for i, row in enumerate(comicData):
         comicData[i] = _decodeComicData(row)

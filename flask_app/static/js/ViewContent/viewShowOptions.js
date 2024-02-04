@@ -1,6 +1,6 @@
 const getOptions = function(optionDataURL) {
     jQuery.ajax({
-        url: `/comicData/${optionDataURL}`,
+        url: `/optionData/${optionDataURL}`,
         data: {},
         type: "POST",
         success: function (comic_data) {

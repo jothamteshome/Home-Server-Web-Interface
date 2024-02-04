@@ -31,6 +31,8 @@ def create_app():
 	app.showDataRefresh = time.perf_counter()
 	app.showsStartup = True
 
+	app.freshApp = True
+
 	with app.app_context():
 		from . import routes
 		return app

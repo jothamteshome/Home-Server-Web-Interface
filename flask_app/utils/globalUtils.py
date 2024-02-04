@@ -159,3 +159,64 @@ def _addComicsToDatabase():
 
     for entry in db_entries:
         db.query('DELETE FROM comicData WHERE comic_loc=%s', [entry])
+
+
+def _collectShowContent(directory):
+    valid_contents = []
+    for content in _tryListDir(directory):
+        show_name = content.replace(".mp4", "")
+
+        if ".mp4" in content:
+            valid_contents.append((show_name, f"{directory}\\{content}"))
+
+    return valid_contents
+
+
+def _listShowThumbnails(thumbnail_dir):
+    thumbnails = _tryListDir(thumbnail_dir)
+    thumbnailDict = {}
+
+    for thumbnail in thumbnails:
+        thumbName = thumbnail.split(".")[0]
+
+        thumbnailDict[thumbName] = f"{thumbnail_dir}\\{thumbnail}"
+
+    return thumbnailDict
+
+
+def _addShowsToDatabase():
+    data = _openJSONDirectoriesFile()
+    SHOW_SUBDIRS = data['retrieve-show-content-dirs']['show-subdirs']
+
+    for search_dir in data['retrieve-show-content-dirs']['search-directories']:
+        for show_dir in _tryListDir(search_dir):
+            show_dir_path = f"{search_dir}\\{show_dir}\\Movie Content"
+
+            if _tryListDir(show_dir_path):
+                
+                show_contents = []
+                thumbnails = _listShowThumbnails(f"{show_dir_path}\\Thumbnails")
+
+                show_contents.extend(_collectShowContent(show_dir_path))
+
+                if show_dir in SHOW_SUBDIRS:
+                    for subdir in SHOW_SUBDIRS[show_dir]:
+                        subdir_path = f"{show_dir_path}{subdir}"
+                        show_contents.extend(_collectShowContent(subdir_path))
+
+                for show in show_contents:
+                    show_name_split = show[0].split(" - ")
+                    title = ""
+                    name = show[0]
+
+                    if len(show_name_split) > 1:
+                        title = show_name_split[0].strip()
+                        name = " - ".join(show_name_split[1:])
+
+                    thumbnail = thumbnails.get(title, "")
+
+                    db.storeShow(show_id=hash(show[1]), show_episode=name, show_name=show_dir, show_ep_num=title,
+                                 show_search_dir=search_dir.split("\\")[-1], show_thumb=thumbnail, show_loc=show[1])
+
+
+

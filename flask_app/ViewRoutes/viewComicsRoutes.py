@@ -28,12 +28,12 @@ def processComics():
     return json.dumps(content)
 
 
-@app.route('/optionData/<franchise_name>/<sorting>', methods=['POST'])
+@app.route('/comicData/<franchise_name>/<sorting>', methods=['POST'])
 @login_required
-def getOptionData(franchise_name, sorting):
+def getComicData(franchise_name, sorting):
     return json.dumps(collectComics(" ".join(franchise_name.split("__")), sorting.strip().lower()))
 
-@app.route('/optionData/<series_id>', methods=['POST'])
+@app.route('/comicData/<series_id>', methods=['POST'])
 def getSeriesData(series_id):
     comicData = _decodeComicData(db.getComic(series_id))
     seriesData = db.query('SELECT * FROM comicData WHERE comic_series=%s', [comicData['comic_name']])

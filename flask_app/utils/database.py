@@ -55,7 +55,7 @@ class database:
 
     def createTables(self, purge=False, data_path='flask_app/database/'):
         # Create new tables
-        tables = {"users": "purge", 'returnData': "purge", 'comicData': None}
+        tables = {"users": "purge", 'returnData': "purge", 'comicData': 'purge', 'showData': 'purge'}
 
         for table in tables:
             if purge and tables[table] == "purge":
@@ -86,10 +86,20 @@ class database:
                           has_chapters, comic_author.encode('utf-8'), comic_loc.encode('utf-8')]])
 
     def getComic(self, comic_id):
-        comicData = self.query("SELECT * FROM comicData where comic_id=%s", [comic_id])
+        comicData = self.query("SELECT * FROM comicData WHERE comic_id=%s", [comic_id])
 
         return comicData[0]
 
+    def storeShow(self, show_id, show_episode, show_name, show_ep_num, show_search_dir, show_thumb, show_loc):
+        self.insertRows('showData',
+                        ['show_id', 'show_episode', 'show_name', 'show_ep_num', 'show_search_dir', 'show_thumb', 'show_loc'],
+                        [[show_id, show_episode.encode('utf-8'), show_name.encode('utf-8'), show_ep_num.encode('utf-8'), 
+                          show_search_dir.encode('utf-8'), show_thumb.encode('utf-8'), show_loc.encode('utf-8')]])
+        
+    def getShow(self, show_id):
+        showData = self.query("SELECT * FROM showData WHERE show_id=%s", [show_id])
+
+        return showData[0]
     
     def storeReturnData(self, searchName, itemName, itemLoc, itemProcessURL, itemDirName=None, itemThumb=None):
         self.insertRows('returnData', ['searchName', 'itemName', 'itemSource', 'itemProcessURL', 'itemDirName', 'itemThumb'], 

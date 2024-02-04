@@ -3,7 +3,7 @@ import json
 from flask import current_app as app
 from flask import redirect, request, session
 from flask_app import uploadRoutes, viewRoutes
-from flask_app.utils.globalUtils import _tryRemoveFile, _dataBatchesFile, _addComicsToDatabase
+from flask_app.utils.globalUtils import _tryRemoveFile, _dataBatchesFile, _addComicsToDatabase, _addShowsToDatabase
 from flask_app.routeTools import clear_temp, render_template
 from flask_app.utils.database  import database
 db = database()
@@ -63,4 +63,15 @@ def home():
 @app.route('/populateComicsDatabase', methods=['POST'])
 def populateComicsDatabase():
     _addComicsToDatabase()
+    app.freshApp = False
     return json.dumps({})
+
+@app.route('/populateShowsDatabase', methods=['POST'])
+def populateShowsDatabase():
+    _addShowsToDatabase()
+    app.freshApp = False
+    return json.dumps({})
+
+@app.route('/checkFreshApp', methods=['POST'])
+def checkAppStartup():
+      return json.dumps({'freshApp': app.freshApp})

@@ -61,3 +61,14 @@ def streamShows(showName, contentName):
                     'href': "/viewShows", 'button-text': "View More Shows"}
     
     return render_template('displayReturnedContent.html', img_data=img_data, success=success_data)
+
+
+# @app.route('/showData/<show_name>/<sorting>', methods=['POST'])
+# @login_required
+# def getShowData(show_name, sorting):
+#     return json.dumps(retreiveShowContent(" ".join(show_name.split("__")), sorting.strip().lower()))
+
+# @app.route('/viewShows/Options/<showName>/<sorting>')
+# @login_required
+# def displayShowOptions(showName, sorting):
+#     return render_template('viewContent/viewShowOptions.html')
