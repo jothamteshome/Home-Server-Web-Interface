@@ -1,23 +1,24 @@
-const getOptions = function(optionDataURL) {
+const getOptions = function(show_name, sorting) {
     jQuery.ajax({
-        url: `/optionData/${optionDataURL}`,
+        url: `/showData/${show_name}/${sorting}`,
         data: {},
         type: "POST",
-        success: function (comic_data) {
-            comic_data = JSON.parse(comic_data);
-            displayOptions(comic_data.data, comic_data.name);
+        success: function (video_data) {
+            video_data = JSON.parse(video_data);
+            listShows(video_data, show_name);
         }
     });
 }
 
 window.addEventListener('load', function () {
     const form = document.querySelector('.form');
-    form.style.display = 'none';
+    form.style.display = "none";
+
+    const linkData = window.location.href.split("/viewShows/")[1].split("/");
+    showLoadingWheel(`Preparing ${linkData[1].replaceAll("__", " ")} Options`)
 
     const title = document.getElementsByTagName('title')[0];
-    title.text = title.text.split(" - ")[0] + " - Viewing Comic Options";
+    title.text = title.text.split(" - ")[0] + " - Viewing Show Options";
 
-    const linkData = window.location.href.split("/viewComics/")[1].split("/");
-
-    getOptions(linkData.slice(1).join('/'));
+    getOptions(linkData[1], linkData[2]);
 })

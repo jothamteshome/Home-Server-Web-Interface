@@ -147,8 +147,8 @@ def _sortComics(fileDict, sorting):
     else:
         return dict(sorted(tempAuthorSort.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0]))))
 
-def _decodeComicData(data):
-    convertFunc = {'comic_id': str, 'has_chapters': int}
+def _decodeDBData(data):
+    convertFunc = {'comic_id': str, 'show_id': str, 'has_chapters': int}
 
     for column in data:
         data[column] = data[column].decode('utf-8') if column not in convertFunc else convertFunc[column](data[column])
@@ -157,7 +157,7 @@ def _decodeComicData(data):
 
 
 def _handleDisplayingComic(comic_id):
-    comicData = _decodeComicData(db.getComic(comic_id))
+    comicData = _decodeDBData(db.getComic(comic_id))
     comic = []
 
     loc = comicData['comic_loc']
@@ -197,7 +197,7 @@ def collectComics(franchise_name, sorting):
     comicData = db.query('SELECT * FROM comicData WHERE comic_franchise=%s AND comic_series=%s', [franchise_name.strip(), ""])
 
     for i, row in enumerate(comicData):
-        comicData[i] = _decodeComicData(row)
+        comicData[i] = _decodeDBData(row)
 
         id = row['comic_id']
         name = comicData[i]['comic_name']
@@ -216,7 +216,7 @@ def collectComicSeries(seriesData):
     comicSeriesContents = {'data': {}}
 
     for i, row in enumerate(seriesData):
-        seriesData[i] = _decodeComicData(row)
+        seriesData[i] = _decodeDBData(row)
 
         id = row['comic_id']
         name = seriesData[i]['comic_name']
@@ -248,43 +248,26 @@ def _loadShowData():
 
 # List stored shows and movies
 def _listShows():
-    # If time since last show data update is less than 30 minutes and show data json file exists, load previous data
-    # otherwise perform os walk for updated data
-    if (time.perf_counter() - app.showDataRefresh) < 1800 \
-        and _showDataFile(name_only=True) in _tryListDir(_showDataFile(dir_only=True)) and not app.showsStartup:
-
-        return _loadShowData()
-    
-    app.showDataRefresh = time.perf_counter()
-    data = _openJSONDirectoriesFile()
+    showOptions = {entry['show_search_dir'].decode('utf-8') for entry in db.query("SELECT show_search_dir FROM showData")}
+    showOptions.discard('Extra Content')
+    showOptions = list(showOptions)
+    showOptions.sort()
+    showOptions.append("Extra Content")
 
     showData = []
 
-    for search_dir in data['retrieve-show-content-dirs']['search-directories']:
-        search_dir_name = search_dir.split("\\")[-1]
-        showData.append({"name": f"--- {search_dir_name} ---", 'disabled': True})
-        search_valid = []
+    for search_dir in showOptions:
+        showData.append({"name": f"--- {search_dir} ---", 'disabled': True})
+
         shows = []
 
-        for movie_directory in _tryListDir(search_dir):
-            movie_dir_path = f"{search_dir}\\{movie_directory}"
-            if "Movie Content" in _tryListDir(movie_dir_path):
-                shows.append(f"{movie_dir_path}\\Movie Content")
+        showNames = {entry['show_name'].decode('utf-8') 
+                     for entry in db.query("SELECT show_name FROM showData WHERE show_search_dir=%s", [search_dir])}
 
-        for show_dir in shows:
-            show = show_dir.replace("\\Movie Content", "").split("\\")[-1]
-            search_valid.append({'name': show, 'data': json.dumps({'name': show, 'show-dir-path': show_dir})})
-        
-        showData.extend(sorted(search_valid, key=lambda x: x['name']))
+        for show in showNames:
+            shows.append({'name': show, 'data': json.dumps({'name': "__".join(show.split(" "))})})
 
-    showData.append({'name': "--- Extra Content ---", 'disabled': True})
-
-    for show_dir in data['retrieve-show-content-dirs']['extra-directories']:
-        show = show_dir.split("\\")[-1]
-        showData.append({'name': show, 'data': json.dumps({'name': show, 'show-dir-path': show_dir})})
-
-    _writeShowDataToJSON(showData)
-    app.showsStartup = False
+        showData.extend(sorted(shows, key=lambda x: x['name']))
 
     return showData
 
@@ -322,47 +305,37 @@ def _getThumbnail(thumbnails, showTitle):
 
 
 # Retrieves show content for listing purposes
-def retreiveShowContent(name, show_dir_path, sorting):
-    data = _openJSONDirectoriesFile()
-    SHOW_SUBDIRS = data['retrieve-show-content-dirs']['show-subdirs']
-
+def retreiveShowContent(name, sorting):
     content = []
-
-    if name in SHOW_SUBDIRS:
-        subdirNames = SHOW_SUBDIRS[name]
-
-        for subdir in subdirNames:
-            full_dir = f"{show_dir_path}{subdir}"
-            content.extend(_collectShowContent(full_dir))
-
-    content.extend(_collectShowContent(show_dir_path))
-
-    thumbnails = _listThumbnails(f"{show_dir_path}\\Thumbnails")
+    thumbnails = []
     
+    showData = db.query("SELECT * FROM showData WHERE show_name=%s", [name])
+
+    for i, row in enumerate(showData):
+        showData[i] = _decodeDBData(row)
+
+        id = showData[i]['show_id']
+        name = showData[i]['show_episode']
+        title = showData[i]['show_ep_num']
+        loc = showData[i]['show_loc']
+        thumb_loc = showData[i]['show_thumb']
+
+        content.append((name, loc, id, title, thumb_loc))
+
     content = _sortStyle(content, sorting)
-    dir_name = show_dir_path.replace("\\Movie Content", "").split("\\")[-1]
 
     returnableContent = {}
-    tempThumbnails = []
+
     for show in content:
-        if " - " in show[0]:
-            title = show[0].split(" - ")
-            name = " - ".join(title[1:])
-            title = title[0]
-            thumbnail = _getThumbnail(thumbnails, title)
+        name = " - ".join(show[0].split(" - ")[1:])
+        thumbnail = f"{_tempDirectory(True)}/{show[0]}.jpg" if show[4] else None
 
-            if thumbnail:
-                tempThumbnails.append((f"{show[0]}.jpg", thumbnail))
+        if show[4]:
+            thumbnails.append((f"{show[0]}.jpg", show[4]))
 
-        else:
-            title = ""
-            name = show[0]
-            thumbnail = None
+        returnableContent[show[0]] = {'id': show[2], 'name': name, 'title': show[3], 'thumbnail': thumbnail}
 
-        returnableContent[show[0]] = {'name': name, 'title': title, 'loc': show[1], 'dirName': dir_name, 'thumbnail': thumbnail,
-                                      'tempDir': f"{_tempDirectory(True)}"}
-
-    _copyFilesToTemp(tempThumbnails)
+    _copyFilesToTemp(thumbnails)
 
     return returnableContent
 

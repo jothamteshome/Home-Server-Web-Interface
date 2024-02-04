@@ -186,6 +186,9 @@ def _listShowThumbnails(thumbnail_dir):
 
 def _addShowsToDatabase():
     data = _openJSONDirectoriesFile()
+
+    db_entries = {entry['show_loc'].decode('utf-8') for entry in db.query("SELECT show_loc FROM showData")}
+
     SHOW_SUBDIRS = data['retrieve-show-content-dirs']['show-subdirs']
 
     for search_dir in data['retrieve-show-content-dirs']['search-directories']:
@@ -207,16 +210,35 @@ def _addShowsToDatabase():
                 for show in show_contents:
                     show_name_split = show[0].split(" - ")
                     title = ""
-                    name = show[0]
 
                     if len(show_name_split) > 1:
                         title = show_name_split[0].strip()
-                        name = " - ".join(show_name_split[1:])
 
                     thumbnail = thumbnails.get(title, "")
 
-                    db.storeShow(show_id=hash(show[1]), show_episode=name, show_name=show_dir, show_ep_num=title,
+                    db.storeShow(show_id=hash(show[1]), show_episode=show[0], show_name=show_dir, show_ep_num=title,
                                  show_search_dir=search_dir.split("\\")[-1], show_thumb=thumbnail, show_loc=show[1])
+                    
+                    db_entries.discard(show[1])
+                    
 
+    for show_dir_path in data['retrieve-show-content-dirs']['extra-directories']:
+        show_contents = []
 
+        show_contents.extend(_collectShowContent(show_dir_path))
 
+        for show in show_contents:
+            show_name_split = show[0].split(" - ")
+
+            title = ""
+
+            if len(show_name_split) > 1:
+                title = show_name_split[0].strip()
+
+            db.storeShow(show_id=hash(show[1]), show_episode=show[0], show_name=show_dir_path.split("\\")[-1], show_ep_num=title,
+                        show_search_dir="Extra Content", show_thumb="", show_loc=show[1])
+            
+            db_entries.discard(show[1])
+
+        for entry in db_entries:
+            db.query('DELETE FROM showData WHERE show_loc=%s', [entry])

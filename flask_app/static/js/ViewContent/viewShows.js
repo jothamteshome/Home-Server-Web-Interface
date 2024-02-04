@@ -1,78 +1,34 @@
 const mainSection = document.getElementsByTagName('main')[0];
 
-// Found at https://stackoverflow.com/a/30106551
-const b64EncodeUnicode = function (str) {
-    // first we use encodeURIComponent to get percent-encoded Unicode,
-    // then we convert the percent encodings into raw bytes which
-    // can be fed into btoa.
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-        function toSolidBytes(match, p1) {
-            return String.fromCharCode('0x' + p1);
-    }));
-}
+const saveTempVideo = function(e) {
+    const target = e.currentTarget;
 
-const storeShowData = function (element) {
-    let urlShowName = b64EncodeUnicode(element.attributes.video_name);
-
-    const data = {
-        'search_name': urlShowName, 'item_name': element.attributes.video_name,
-        'item_loc': element.attributes.source_loc, 'item_dir': element.attributes.dir_name, 
-        'item_thumb': element.attributes.thumb_loc,'processURL': "/downloadTempShowContent"
-    };
+    showLoadingWheel(`Preparing ${target.attributes.video_name}`)
 
     jQuery.ajax({
-        url: "/storeReturnData",
-        data: data,
+        url: `/downloadTempShowContent/${target.id}`,
+        data: {},
         type: "POST"
     });
 }
 
-
-const getShowData = function (urlShowName) {
-    let data = { 'name': null, 'loc': null, 'item_dir': null, 'processURL': null , 'thumb': null};
-    jQuery.ajax({
-        url: "/getReturnData",
-        data: { 'search_name': urlShowName },
-        type: "POST",
-        async: false,
-        success: function (video_data) {
-            video_data = JSON.parse(video_data);
-            data.name = video_data.itemName;
-            data.loc = video_data.itemSource;
-            data.processURL = video_data.itemProcessURL;
-            data.item_dir = video_data.itemDirName;
-            data.thumb = video_data.itemThumb;
-        }
-    });
-
-    return data;
-}
-
-
-const saveTempVideo = function(e) {
-    const target = e.currentTarget;
-    storeShowData(target);
-
-    showLoadingWheel(`Preparing ${target.attributes.video_name}`)
-
-    var data = {'name': target.attributes.video_name, 'loc': target.attributes.source_loc, 'thumb': target.attributes.thumb_loc};
-
-    jQuery.ajax({
-        url: "/downloadTempShowContent",
-        data: data,
-        type: "POST",
-        success:function(){
-              window.location.href = `/viewShows/${target.attributes.dir_name}/${b64EncodeUnicode(target.attributes['video_name'])}`;
-        }
-    });
-}
-
-const listShows = function(video_data) {
+const listShows = function(video_data, show_name) {
     const form = document.querySelector('.form');
     form.style.display = "none";
 
+    loadingContent.style.display = "none";
+
     const optionContainer = document.createElement('div');
     optionContainer.classList.add('optionsContainer');
+
+    const success_message = document.createElement('h1');
+    success_message.classList.add('success-message');
+    display_show_name = show_name.replaceAll("__", " ")
+    success_message.textContent = `${Object.keys(video_data).length} Options for ${display_show_name}`;
+    optionContainer.appendChild(success_message);
+
+    const title = document.getElementsByTagName('title')[0];
+    title.text = `${title.text.split(" - ")[0]} - Viewing Options For ${display_show_name}`;
 
     const list = document.createElement('ul');
     list.classList.add('optionList');
@@ -80,17 +36,16 @@ const listShows = function(video_data) {
     for (const vid in video_data) {
         const list_element = document.createElement('a');
         list_element.classList.add('option');
-        list_element.attributes['dir_name'] = video_data[vid].dirName;
-        list_element.attributes['source_loc'] = video_data[vid].loc;
-        list_element.attributes['thumb_loc'] = video_data[vid].thumbnail;
-        list_element.attributes['video_name'] = vid;
-        list_element.href = `/viewShows#${b64EncodeUnicode(vid)}`;
-        list_element.addEventListener('contextmenu', function () { storeShowData(list_element); });
+        list_element.href = `/viewShows/${show_name}/${video_data[vid].id}`;
+        list_element.attributes.video_name = vid;
+        list_element.id = video_data[vid].id;
+
+        list_element.addEventListener('click', saveTempVideo)
         
         if (video_data[vid].thumbnail) {
             const thumbnail = document.createElement('img');
             thumbnail.classList.add('optionThumb');
-            thumbnail.src = `/static/${video_data[vid].tempDir}/${vid}.jpg`;
+            thumbnail.src = `/static/${video_data[vid].thumbnail}`;
             thumbnail.loading = 'lazy';
             thumbnail.alt = `Thumbnail for ${vid}`;
 
@@ -125,8 +80,6 @@ const listShows = function(video_data) {
         list_element_text.appendChild(link_name);
         
         list.appendChild(list_element);
-
-        list_element.addEventListener('click', saveTempVideo);
     }
 
     optionContainer.appendChild(list)
@@ -135,72 +88,23 @@ const listShows = function(video_data) {
 }
 
 
-const loadFromURL = function (data) {
-    const form = document.querySelector('.form');
-    form.style.display = "none";
-
-    showLoadingWheel(`Preparing ${data.name}`)
-
-    jQuery.ajax({
-        url: data.processURL,
-        data: data,
-        type: "POST",
-        success: function () {
-            window.location.href = `/viewShows/${data.item_dir}/${b64EncodeUnicode(data.name)}`;
-        }
-    });
-}
-
-
-// Handle ajax request for data
 const processData = function () {
     const sorting = document.querySelector('input[type="radio"][name="sorting"]:checked').value;
 
     const data = JSON.parse(currentOption.value);
     data.sorting = sorting;
 
-    // SEND DATA TO SERVER VIA jQuery.ajax({})
-    jQuery.ajax({
-        url: "/processShows",
-        data: data,
-        type: "POST",
-        success:function(video_data){
-              video_data = JSON.parse(video_data);
-              listShows(video_data);
-            }
-    });
+    window.location.href = `/viewShows/Options/${data.name}/${data.sorting}`;
 }
 
 const showsPageOnShow = function () {
     findSelected();
-
-    const form = document.querySelector('.form');
-    const optionContainer = document.querySelector('.optionsContainer');
-    loadingContent.style.display = "none";
-
-    if (optionContainer) { optionContainer.remove(); }
-
-    if (window.location.href.search("#") !== -1) {
-        const url = window.location.href.split("#");
-        const urlShowName = url.slice(-1)[0];
-       loadFromURL(getShowData(urlShowName));
-    } else {
-        form.style.display = "flex";
-    }
 }
 
 
 window.addEventListener('load', function () {
-    const form = document.querySelector('.form');
     const title = document.getElementsByTagName('title')[0];
-    title.text = title.text + " - Viewing Shows";
-
-    form.style.display = "none";
-    loadingContent.style.display = "none";
-
-    if (getPrevPageLoc().search('/viewShows/') !== -1) {
-        window.history.replaceState({}, "", "/viewShows");
-    }
+    title.text = title.text + " - Shows";
 
     window.removeEventListener('pageshow', window.viewPageStandardOnShow);
 })

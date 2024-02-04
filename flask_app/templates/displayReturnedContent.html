@@ -27,7 +27,7 @@
         {% elif img['data']['type'] == "video" %}
 
         {% if img.get('data', {}).get('thumb', False) %}
-            <video class="content" alt="{{success['alt']}}" loading="lazy" poster="{{thumb_filepath}}" controls do-loop="{{success.get('loop', False)}}"></video>
+            <video class="content" alt="{{success['alt']}}" loading="lazy" poster="{{thumb_filepath}}" controls do-loop="{{success.get('loop', False)}}">
         {% else %}
             <video class="content" alt="{{success['alt']}}" loading="lazy" controls do-loop="{{success.get('loop', False)}}">
         {% endif %}

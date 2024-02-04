@@ -1,11 +1,12 @@
 import json
-import base64
 
 from flask import current_app as app
 from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template
 from flask_app.utils.globalUtils import _tempDirectory
-from flask_app.utils.displayContent import retreiveShowContent, _copyFilesToTemp, _listShows
+from flask_app.utils.displayContent import retreiveShowContent, _copyFilesToTemp, _listShows, _decodeDBData
+from flask_app.utils.database import database
+db = database()
 
 
 # Displays template for viewing longform movie/show content
@@ -30,31 +31,36 @@ def processShows():
 
 
 # Handles the downloading of content to temp directory after show selection is made
-@app.route('/downloadTempShowContent', methods=['POST'])
+@app.route('/downloadTempShowContent/<show_id>', methods=['POST'])
 @login_required
 @clear_temp
-def downloadTempShowContent():
-    form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-    name, source, thumb = form_fields['name'], form_fields['loc'], form_fields['thumb']
+def downloadTempShowContent(show_id):
+    show = db.getShow(show_id)
+    show = _decodeDBData(show)
 
-    filesToDownload = [(f"{name}.mp4", source)]
+    filesToDownload = []
 
-    if thumb:
-        filesToDownload.append((f"{name}.jpg", thumb))
+    if show['show_thumb']:
+        filesToDownload.append((f"{show['show_episode']}.jpg", show['show_thumb']))
+
+    filesToDownload.append((f"{show['show_episode']}.mp4", show['show_loc']))
 
     _copyFilesToTemp(filesToDownload)
-    
 
     return json.dumps({})
 
 
 # Processes the displaying of singular show video from temp directory
-@app.route('/viewShows/<showName>/<contentName>')
+@app.route('/viewShows/<showName>/<show_id>')
 @login_required
-def streamShows(showName, contentName):
-    contentName = base64.urlsafe_b64decode(contentName).decode('utf-8')
-    img_data = [{'name': contentName, 'data': {'file': f"{_tempDirectory(True)}/{contentName}.mp4", 
-                                               'thumb': f"{_tempDirectory(True)}/{contentName}.jpg", 'type': 'video'}}]
+def streamShows(showName, show_id):
+    show_data = _decodeDBData(db.getShow(show_id))
+    showName = " ".join(showName.split("__"))
+    contentName = show_data['show_episode']
+    temp_name = f"{_tempDirectory(True)}/{contentName}"
+
+    img_data = [{'name': contentName, 'data': {'file': f"{temp_name}.mp4", 'thumb': f"{temp_name}.jpg" 
+                                               if show_data['show_thumb'] else None, 'type': 'video'}}]
 
     success_data = {'message': f"Currently viewing {showName} content", 
                     'alt': f"Image from {showName}",
@@ -63,12 +69,13 @@ def streamShows(showName, contentName):
     return render_template('displayReturnedContent.html', img_data=img_data, success=success_data)
 
 
-# @app.route('/showData/<show_name>/<sorting>', methods=['POST'])
-# @login_required
-# def getShowData(show_name, sorting):
-#     return json.dumps(retreiveShowContent(" ".join(show_name.split("__")), sorting.strip().lower()))
+@app.route('/showData/<show_name>/<sorting>', methods=['POST'])
+@login_required
+def getShowData(show_name, sorting):
+    return json.dumps(retreiveShowContent(" ".join(show_name.split("__")), sorting.strip().lower()))
 
-# @app.route('/viewShows/Options/<showName>/<sorting>')
-# @login_required
-# def displayShowOptions(showName, sorting):
-#     return render_template('viewContent/viewShowOptions.html')
+
+@app.route('/viewShows/Options/<showName>/<sorting>')
+@login_required
+def displayShowOptions(showName, sorting):
+    return render_template('viewContent/viewShowOptions.html')

@@ -21,8 +21,6 @@ const displayOptions = function (comic_data, optionName) {
     for (const comic in comic_data) {
         const list_element = document.createElement('a');
         list_element.classList.add('option');
-        list_element.attributes['comic_id'] = comic_data[comic].id;
-        list_element.attributes['comic_name'] = comic;
 
         const list_element_text = document.createElement('div');
         list_element_text.classList.add('optionText');
