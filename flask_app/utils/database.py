@@ -55,7 +55,7 @@ class database:
 
     def createTables(self, purge=False, data_path='flask_app/database/'):
         # Create new tables
-        tables = {"users": "purge", 'returnData': "purge", 'comicData': 'purge', 'showData': 'purge'}
+        tables = {"users": "purge", 'comicData': 'purge', 'showData': 'purge'}
 
         for table in tables:
             if purge and tables[table] == "purge":
@@ -100,15 +100,6 @@ class database:
         showData = self.query("SELECT * FROM showData WHERE show_id=%s", [show_id])
 
         return showData[0]
-    
-    def storeReturnData(self, searchName, itemName, itemLoc, itemProcessURL, itemDirName=None, itemThumb=None):
-        self.insertRows('returnData', ['searchName', 'itemName', 'itemSource', 'itemProcessURL', 'itemDirName', 'itemThumb'], 
-                        [[searchName, itemName, itemLoc, itemProcessURL, itemDirName, itemThumb]])
-
-    def getReturnData(self, searchName):
-        returnData = self.query(f"SELECT * FROM returnData where searchName=%s", [searchName])
-
-        return returnData
 
     def createUser(self, user='user', password='user', role='user'):
         users = self.query(f"SELECT * FROM users WHERE username = '{user}'")

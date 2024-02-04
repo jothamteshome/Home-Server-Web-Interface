@@ -14,12 +14,13 @@ def create_app():
 	app = Flask(__name__)
 	_deleteAllTempDirectores()
 	_deleteUserDataBatches()
-	_addComicsToDatabase()
-	_addShowsToDatabase()
 
 	from flask_app.utils.database import database
 	db = database()
 	db.createTables(purge=True)
+
+	_addComicsToDatabase()
+	_addShowsToDatabase()
 
 	# Create admin user
 	prop_reader = PropertiesReader()
@@ -29,11 +30,6 @@ def create_app():
 	db.createUser(user=admin_user, password=admin_pass, role='admin')
 
 	app.secret_key = 'AKWNF1231082fksejfOSEHFOISEHF24142124124124124iesfhsoijsopdjf'
-
-	app.showDataRefresh = time.perf_counter()
-	app.showsStartup = True
-
-	app.freshApp = True
 
 	with app.app_context():
 		from . import routes

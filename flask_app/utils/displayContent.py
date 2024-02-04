@@ -235,17 +235,6 @@ def collectComicSeries(seriesData):
 #                   SHOW CONTENT HANDLING                          #
 ####################################################################
 
-def _writeShowDataToJSON(showData):
-    with open(_showDataFile(), 'w') as jsonFile:
-        json.dump({'show-data': showData}, jsonFile)
-
-
-def _loadShowData():
-    with open(_showDataFile(), 'r') as jsonFile:
-        showData = json.load(jsonFile)['show-data']
-
-        return showData
-
 # List stored shows and movies
 def _listShows():
     showOptions = {entry['show_search_dir'].decode('utf-8') for entry in db.query("SELECT show_search_dir FROM showData")}
@@ -270,38 +259,6 @@ def _listShows():
         showData.extend(sorted(shows, key=lambda x: x['name']))
 
     return showData
-
-
-# Collect valid show names and directories
-def _collectShowContent(directory):
-    valid_contents = []
-    for content in _tryListDir(directory):
-        show_name = content.replace(".mp4", "")
-
-        if ".mp4" in content:
-            valid_contents.append((show_name, f"{directory}\\{content}"))
-
-    return valid_contents
-
-
-def _listThumbnails(thumbnailDir):
-    thumbnails = _tryListDir(thumbnailDir)
-
-    thumbnailDict = {}
-
-    for thumbnail in thumbnails:
-        thumbName = thumbnail.split(".")[0]
-
-        thumbnailDict[thumbName] = f"{thumbnailDir}\\{thumbnail}"
-
-    return thumbnailDict
-
-
-def _getThumbnail(thumbnails, showTitle):
-    if showTitle in thumbnails:
-        return thumbnails[showTitle]
-    else:
-        return None
 
 
 # Retrieves show content for listing purposes
