@@ -8,7 +8,7 @@ import time
 
 from functools import cmp_to_key
 from flask_app.utils.database import database
-from flask_app.utils.globalUtils import _openJSONDirectoriesFile, current_app as app, _showDataFile
+from flask_app.utils.globalUtils import _openJSONDirectoriesFile, current_app as app
 from flask_app.utils.globalUtils import _tempDirectory, _tryListDir, _dataBatchesFile, _tryRemoveFile, winsort
 db = database()
 
@@ -284,7 +284,8 @@ def retreiveShowContent(name, sorting):
     returnableContent = {}
 
     for show in content:
-        name = " - ".join(show[0].split(" - ")[1:])
+        show_split = show[0].split(" - ")
+        name = " - ".join(show_split[1:]) if show[3] else show[0]
         thumbnail = f"{_tempDirectory(True)}/{show[0]}.jpg" if show[4] else None
 
         if show[4]:

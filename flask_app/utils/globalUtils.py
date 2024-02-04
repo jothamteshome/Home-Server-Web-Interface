@@ -78,21 +78,6 @@ def _dataBatchesFile(name_only=False, dir_only=False):
     return fullPath
 
 
-def _showDataFile(name_only=False, dir_only=False):
-    filename = "show_data.json"
-
-    directory = f"flask_app\\utils\\HelperFiles"
-
-    fullPath = f"{directory}\\{filename}"
-
-    if name_only and not dir_only:
-        return filename
-    elif dir_only and not name_only:
-        return directory
-    
-    return fullPath
-
-
 def _tryRemoveFile(filepath):
     try:
         os.remove(filepath)
