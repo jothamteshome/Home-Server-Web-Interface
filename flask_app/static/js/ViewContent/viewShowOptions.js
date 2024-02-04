@@ -10,7 +10,7 @@ const getOptions = function(show_name, sorting) {
     });
 }
 
-window.addEventListener('load', function () {
+const handlePageLoad = function () {
     const form = document.querySelector('.form');
     form.style.display = "none";
 
@@ -21,4 +21,8 @@ window.addEventListener('load', function () {
     title.text = title.text.split(" - ")[0] + " - Viewing Show Options";
 
     getOptions(linkData[1], linkData[2]);
+}
+
+window.addEventListener('pageshow', function () {
+    handlePageLoad();
 })

@@ -2,6 +2,7 @@
 
 {% block extracss %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/displayReturnedContent.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/loadingPage.css') }}">
 {% endblock %}
 
 {% block extrajs %}
@@ -17,8 +18,10 @@
     {% for img in img_data %}
     <!-- Create a content column for image data -->
     <!-- Determine the temporary filepath for the image to display -->
-    {% set filepath = url_for('static', filename=img['data']['file']|replace(' [Duplicate]', '')) %}
-    {% set thumb_filepath = url_for('static', filename=img['data']['thumb'])%}
+
+    {% if img.get('data', {}).get('file', False) %}
+        {% set filepath = url_for('static', filename=img['data']['file']|replace(' [Duplicate]', '')) %}
+    {% endif %}
 
     <div class="content-wrapper">
         <!-- Set the correct source tag for images or videos -->
@@ -26,12 +29,15 @@
         <img class="content" src="{{filepath}}" alt="{{success['alt']}}" loading="lazy" do-loop="{{success.get('loop', False)}}">
         {% elif img['data']['type'] == "video" %}
 
+        {% set thumb_exists = False %}
         {% if img.get('data', {}).get('thumb', False) %}
-            <video class="content" alt="{{success['alt']}}" loading="lazy" poster="{{thumb_filepath}}" controls do-loop="{{success.get('loop', False)}}">
-        {% else %}
-            <video class="content" alt="{{success['alt']}}" loading="lazy" controls do-loop="{{success.get('loop', False)}}">
+            {% set thumb_filepath = url_for('static', filename=img['data']['thumb']) %}
+            {% set thumb_exists = True %}
         {% endif %}
-            <source src="{{filepath}}">
+
+        <video class="content" alt="{{success['alt']}}" loading="lazy" 
+            src="{{filepath}}" {% if thumb_exists %} poster={{thumb_filepath}} {% endif %} 
+            controls do-loop="{{success.get('loop', False)}}">
         </video>
         {% endif %}
 
@@ -57,6 +63,9 @@
     {% endfor %}
 </div>
 
-<!-- Button to repeat route -->
-<a class="performActionAgain" href="{{success['href']}}">{{success['button-text']}}</a>
+<div class="loadingContent">
+    <h1 class="loadingMessage"></h1>
+    <img src="{{url_for('static', filename='images/loading-wheel-gif.gif')}}" loading="lazy" alt="loading-gif">
+</div>
+
 {% endblock %}

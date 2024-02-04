@@ -71,6 +71,41 @@ const setImageSizes = function () {
     }
 }
 
+const fetchShow = function () {
+    const link_data = window.location.href.split("/viewShows/Watching/")[1].split("/");
+    const loadingContent = document.querySelector('.loadingContent');
+    const loadingMessage = document.querySelector('.loadingMessage');
+    const success_message = document.querySelector('.success-message');
+    const pageContent = document.querySelector('.content-column');
+
+    success_message.style.display = "none";
+    pageContent.style.display = "none";
+    loadingMessage.textContent = `Preparing ${link_data[0].replaceAll("__", " ")} Content`;
+    loadingContent.style.display = "flex";
+
+    jQuery.ajax({
+        url: `/downloadTempShowContent/${link_data[1]}`,
+        data: {},
+        type: "POST",
+        success: function (return_data) {
+            return_data = JSON.parse(return_data);
+
+            const content = document.querySelector('.content');
+            content.src = `/static/${return_data.path}`;
+
+            loadingContent.style.display = "none";
+            success_message.style.display = "block";
+            pageContent.style.display = "flex";
+        }
+    });
+}
+
+const displayShowContent = function () {
+    if (window.location.href.search("/viewShows/Watching/") === -1) { return; }
+
+    fetchShow();
+}
+
 window.onresize = function () {
     pageUpdated();
     if (prevPortraitView !== portraitView) {
@@ -82,6 +117,7 @@ window.onpageshow = function () {
     const title = document.getElementsByTagName('title')[0];
     const success = document.querySelector('.success-message');
     title.text = success.textContent;
+    displayShowContent();
     pageUpdated();
     setImageSizes();
 }

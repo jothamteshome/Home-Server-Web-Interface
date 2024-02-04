@@ -47,11 +47,11 @@ def downloadTempShowContent(show_id):
 
     _copyFilesToTemp(filesToDownload)
 
-    return json.dumps({})
+    return json.dumps({'path': f"{_tempDirectory(True)}/{show['show_episode']}.mp4"})
 
 
 # Processes the displaying of singular show video from temp directory
-@app.route('/viewShows/<showName>/<show_id>')
+@app.route('/viewShows/Watching/<showName>/<show_id>')
 @login_required
 def streamShows(showName, show_id):
     show_data = _decodeDBData(db.getShow(show_id))
@@ -59,12 +59,14 @@ def streamShows(showName, show_id):
     contentName = show_data['show_episode']
     temp_name = f"{_tempDirectory(True)}/{contentName}"
 
-    img_data = [{'name': contentName, 'data': {'file': f"{temp_name}.mp4", 'thumb': f"{temp_name}.jpg" 
+    img_data = [{'name': contentName, 'data': {'file': None, 'thumb': f"{temp_name}.jpg" 
                                                if show_data['show_thumb'] else None, 'type': 'video'}}]
 
     success_data = {'message': f"Currently viewing {showName} content", 
                     'alt': f"Image from {showName}",
                     'href': "/viewShows", 'button-text': "View More Shows"}
+    
+    print(img_data[0]['data']['thumb'])
     
     return render_template('displayReturnedContent.html', img_data=img_data, success=success_data)
 

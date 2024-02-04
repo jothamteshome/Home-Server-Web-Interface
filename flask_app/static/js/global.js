@@ -51,8 +51,10 @@ window.addEventListener('load', function () {
         type: "POST",
         success: function (freshApp) {
             freshApp = JSON.parse(freshApp);
-            populateComicsDatabase(freshApp.freshApp);
-            populateShowsDatabase(freshApp.freshApp);
+            if (freshApp.freshApp) {
+                populateComicsDatabase(freshApp.freshApp);
+                populateShowsDatabase(freshApp.freshApp);
+            }
         }
     });
     

@@ -1,17 +1,5 @@
 const mainSection = document.getElementsByTagName('main')[0];
 
-const saveTempVideo = function(e) {
-    const target = e.currentTarget;
-
-    showLoadingWheel(`Preparing ${target.attributes.video_name}`)
-
-    jQuery.ajax({
-        url: `/downloadTempShowContent/${target.id}`,
-        data: {},
-        type: "POST"
-    });
-}
-
 const listShows = function(video_data, show_name) {
     const form = document.querySelector('.form');
     form.style.display = "none";
@@ -36,11 +24,7 @@ const listShows = function(video_data, show_name) {
     for (const vid in video_data) {
         const list_element = document.createElement('a');
         list_element.classList.add('option');
-        list_element.href = `/viewShows/${show_name}/${video_data[vid].id}`;
-        list_element.attributes.video_name = vid;
-        list_element.id = video_data[vid].id;
-
-        list_element.addEventListener('click', saveTempVideo)
+        list_element.href = `/viewShows/Watching/${show_name}/${video_data[vid].id}`;
         
         if (video_data[vid].thumbnail) {
             const thumbnail = document.createElement('img');
