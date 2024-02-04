@@ -31,11 +31,10 @@ const populateComicsDatabase = function (waitAsync) {
     });
 }
 
-const populateShowsDatabase = function(waitAsync) {
+const populateShowsDatabase = function() {
     jQuery.ajax({
         url: "/populateShowsDatabase",
         data: {},
-        async: waitAsync ? false : true,
         type: "POST"
     });
 }
@@ -43,20 +42,6 @@ const populateShowsDatabase = function(waitAsync) {
 window.addEventListener('load', function () {
     sessionStorage.setItem('prevPageLoc', getPageLocation());
     setPageLocation();
-
-    jQuery.ajax({
-        url: "/checkFreshApp",
-        data: {},
-        async: false,
-        type: "POST",
-        success: function (freshApp) {
-            freshApp = JSON.parse(freshApp);
-            if (freshApp.freshApp) {
-                populateComicsDatabase(freshApp.freshApp);
-                populateShowsDatabase(freshApp.freshApp);
-            }
-        }
-    });
     
     window.setInterval(populateComicsDatabase, 300000);
     window.setInterval(populateShowsDatabase, 300000);

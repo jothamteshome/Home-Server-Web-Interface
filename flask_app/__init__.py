@@ -3,7 +3,7 @@ import time
 from flask import Flask
 from flask_failsafe import failsafe
 from flask_app.utils.PropertiesReader import PropertiesReader
-from flask_app.utils.globalUtils import _deleteUserDataBatches, _deleteAllTempDirectores
+from flask_app.utils.globalUtils import _deleteUserDataBatches, _deleteAllTempDirectores, _addComicsToDatabase, _addShowsToDatabase
 
 
 #--------------------------------------------------
@@ -14,6 +14,8 @@ def create_app():
 	app = Flask(__name__)
 	_deleteAllTempDirectores()
 	_deleteUserDataBatches()
+	_addComicsToDatabase()
+	_addShowsToDatabase()
 
 	from flask_app.utils.database import database
 	db = database()

@@ -72,7 +72,3 @@ def populateShowsDatabase():
     _addShowsToDatabase()
     app.freshApp = False
     return json.dumps({})
-
-@app.route('/checkFreshApp', methods=['POST'])
-def checkAppStartup():
-      return json.dumps({'freshApp': app.freshApp})
