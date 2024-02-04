@@ -22,15 +22,21 @@ const setPageLocation = function () {
     sessionStorage.setItem('pageLoc', window.location.href.replace(window.location.origin, ""));
 }
 
+const populateComicsDatabase = function () {
+    jQuery.ajax({
+        url: "/populateComicsDatabase",
+        data: {},
+        type: "POST"
+    });
+}
+
 window.addEventListener('load', function () {
     sessionStorage.setItem('prevPageLoc', getPageLocation());
     setPageLocation();
-
+    
     if (window.location.href.replace(window.location.origin, "") === "/") {
-        jQuery.ajax({
-            url: "/populateComicsDatabase",
-            data: {},
-            type: "POST"
-        });
+        populateComicsDatabase();
     }
+    
+    window.setInterval(populateComicsDatabase, 300000);
 })

@@ -120,6 +120,8 @@ def winsort():
 def _addComicsToDatabase():
     data = _openJSONDirectoriesFile()
 
+    db_entries = {entry['comic_loc'].decode('utf-8') for entry in db.query("SELECT comic_loc FROM comicData")}
+
     for search_dir in data['retrieve-comic-content-dirs']['search-directories']:
         for subgenre in search_dir['sub-genres']:
             subgenre_dir = f"{search_dir['main-dir']}{subgenre}"
@@ -148,5 +150,12 @@ def _addComicsToDatabase():
                             db.storeComic(comic_id=hash(comic_part_loc), comic_name=comic_part, comic_franchise=franchise, 
                                           comic_series=comic, comic_author=author, comic_loc=comic_part_loc, has_chapters=0)
                             
+                            db_entries.discard(comic_part_loc)
+                            
                     db.storeComic(comic_id=hash(comic_loc), comic_name=comic, comic_franchise=franchise, 
                                       comic_author=author, comic_loc=comic_loc, has_chapters=has_chapters)
+                    
+                    db_entries.discard(comic_loc)
+
+    for entry in db_entries:
+        db.query('DELETE FROM comicData WHERE comic_loc=%s', [entry])
