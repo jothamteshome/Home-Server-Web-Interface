@@ -151,7 +151,7 @@ def _collectShowContent(directory):
     for content in _tryListDir(directory):
         show_name = content.replace(".mp4", "")
 
-        if ".mp4" in content:
+        if content.split('.')[-1] == "mp4":
             valid_contents.append((show_name, f"{directory}\\{content}"))
 
     return valid_contents
