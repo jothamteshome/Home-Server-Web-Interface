@@ -81,3 +81,8 @@ def getShowData(show_name, sorting):
 @login_required
 def displayShowOptions(showName, sorting):
     return render_template('viewContent/viewShowOptions.html')
+
+@app.route('/viewShows/Options/<showName>/')
+@login_required
+def displayShowOptionsOneOption(showName):
+    return render_template('viewContent/viewShowOptions.html')

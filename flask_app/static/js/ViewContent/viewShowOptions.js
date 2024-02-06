@@ -1,4 +1,6 @@
 const getOptions = function(show_name, sorting) {
+
+    if (!sorting) { sorting = "A-Z"; }
     jQuery.ajax({
         url: `/showData/${show_name}/${sorting}`,
         data: {},

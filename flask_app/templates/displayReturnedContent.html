@@ -26,10 +26,11 @@
     <div class="content-wrapper">
         <!-- Set the correct source tag for images or videos -->
         {% if img['data']['type'] == "image" %}
-        <img class="content" src="{{filepath}}" alt="{{success['alt']}}" loading="lazy" do-loop="{{success.get('loop', False)}}">
+        <img class="content" src="{{filepath}}" alt="{{success['alt']}}" loading="lazy">
         {% elif img['data']['type'] == "video" %}
 
         {% set thumb_exists = False %}
+        {% set do_loop = success.get('loop', False) %}
         {% if img.get('data', {}).get('thumb', False) %}
             {% set thumb_filepath = url_for('static', filename=img['data']['thumb']) %}
             {% set thumb_exists = True %}
@@ -37,7 +38,7 @@
 
         <video class="content" alt="{{success['alt']}}" loading="lazy" 
             src="{{filepath}}" {% if thumb_exists %} poster={{thumb_filepath}} {% endif %} 
-            controls do-loop="{{success.get('loop', False)}}">
+            controls {% if do_loop %} autoplay loop muted {% endif %}>
         </video>
         {% endif %}
 
