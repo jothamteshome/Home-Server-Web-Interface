@@ -3,7 +3,7 @@ import time
 from flask import Flask
 from flask_failsafe import failsafe
 from flask_app.utils.PropertiesReader import PropertiesReader
-from flask_app.utils.globalUtils import _deleteUserDataBatches, _deleteAllTempDirectores, _addComicsToDatabase, _addShowsToDatabase, _addPremadeMemes, _addFinalizedMemes, _addShortformContent
+from flask_app.utils.globalUtils import _deleteUserDataBatches, _deleteAllTempDirectores, _addComicsToDatabase, _addShowsToDatabase, _addAllShortContentToDatabase
 
 
 #--------------------------------------------------
@@ -21,9 +21,7 @@ def create_app():
 
 	_addComicsToDatabase()
 	_addShowsToDatabase()
-	_addShortformContent()
-	_addFinalizedMemes()
-	_addPremadeMemes()
+	_addAllShortContentToDatabase()
 
 	# Create admin user
 	prop_reader = PropertiesReader()

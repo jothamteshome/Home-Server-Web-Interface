@@ -55,7 +55,8 @@
     background-color:#364951;
     list-style-type: none;
     white-space: nowrap;
-    width: 10rem;
+    width: 10vw;
+    font-size: 1vw;
 }
 
 #upload {

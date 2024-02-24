@@ -39,10 +39,19 @@ const populateShowsDatabase = function() {
     });
 }
 
+const populateShortContentDatabase = function() {
+    jQuery.ajax({
+        url: "/populateShortContentDatabase",
+        data: {},
+        type: "POST"
+    });
+}
+
 window.addEventListener('load', function () {
     sessionStorage.setItem('prevPageLoc', getPageLocation());
     setPageLocation();
     
     window.setInterval(populateComicsDatabase, 300000);
     window.setInterval(populateShowsDatabase, 300000);
+    window.setInterval(populateShortContentDatabase, 300000);
 })

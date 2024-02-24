@@ -5,7 +5,7 @@ import re
 from ctypes import wintypes, windll
 from flask import session, current_app
 from flask_app.utils.database import database
-import mysql
+
 db = database()
 
 # Opens json file containing directories
@@ -263,7 +263,7 @@ def _checkCaptionExistence(directory, content_name):
     return f"{directory}\\Captions\\{caption_name}"
 
 
-def _addPremadeMemes():
+def _addPremadeMemesToDatabase():
     data = _openJSONDirectoriesFile()
 
     VIDEO_EXTENSIONS = {'mp4', 'mov'}
@@ -294,7 +294,7 @@ def _addPremadeMemes():
                         
                         content_type = "image" if ext not in VIDEO_EXTENSIONS else "video"
 
-                        caption_loc = _checkCaptionExistence(content_dir, content)
+                        caption_loc = _checkCaptionExistence(content_dir_path, content)
 
                         has_caption = 0 if not caption_loc else 1
 
@@ -311,7 +311,7 @@ def _addPremadeMemes():
         db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
 
 
-def _addShortformContent():
+def _addShortformContentToDatabase():
     data = _openJSONDirectoriesFile()
 
     VIDEO_EXTENSIONS = {'mp4', 'mov'}
@@ -345,7 +345,7 @@ def _addShortformContent():
 
                         content_type = "image" if ext not in VIDEO_EXTENSIONS else "video"
 
-                        caption_loc = _checkCaptionExistence(content_dir, content)
+                        caption_loc = _checkCaptionExistence(content_dir_path, content)
 
                         has_caption = 0 if not caption_loc else 1
 
@@ -363,7 +363,7 @@ def _addShortformContent():
         db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
 
 
-def _addFinalizedMemes():
+def _addFinalizedMemesToDatabase():
     data = _openJSONDirectoriesFile()
 
     db_entries = {entry['content_loc'].decode('utf-8') for entry in db.query("SELECT content_loc FROM shortContentData WHERE content_style=%s", ['Finalized Meme'])}
@@ -402,3 +402,9 @@ def _addFinalizedMemes():
     for entry in db_entries:
         db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
 
+
+def _addAllShortContentToDatabase():
+    _addShortformContentToDatabase()
+    _addFinalizedMemesToDatabase()
+    _addPremadeMemesToDatabase()
+    

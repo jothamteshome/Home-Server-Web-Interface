@@ -4,13 +4,13 @@ from flask_app.utils.imageUploading import _generateContentHash, _uploadImage
 from flask_app.utils.globalUtils import _tempDirectory, _openJSONDirectoriesFile
 
 
-def _retreiveMemeCaptions(content_hash, existingOnly=False):
+def _retreiveMemeCaptions(content_hash, img_ext, existingOnly=False):
     CAPTION_DIR = _openJSONDirectoriesFile()['conditionally-included-routes']['finalized-memes-dirs']['text-directory']
     returnedCaptions = []
     existingCaptions = set()
 
     try:
-        with open(f"{CAPTION_DIR}\\{content_hash}.txt", "r") as captionFile:
+        with open(f"{CAPTION_DIR}\\{content_hash}_{img_ext}.txt", "r") as captionFile:
             for line in captionFile:
                 line = line.strip()
                 returnedCaptions.append("\n\n".join(line.split("***")))
@@ -23,16 +23,16 @@ def _retreiveMemeCaptions(content_hash, existingOnly=False):
     
     return returnedCaptions, existingCaptions
 
-def _handleCaptionUpload(content_hash, caption):
+def _handleCaptionUpload(content_hash, caption, img_ext):
     CAPTION_DIR = _openJSONDirectoriesFile()['conditionally-included-routes']['finalized-memes-dirs']['text-directory']
     os.makedirs(CAPTION_DIR, exist_ok=True)
 
-    returnedCaptions, existingCaptions = _retreiveMemeCaptions(content_hash)
+    returnedCaptions, existingCaptions = _retreiveMemeCaptions(content_hash, img_ext)
     duplicate = True
 
 
     # Write caption to file
-    with open(f"{CAPTION_DIR}\\{content_hash}.txt", "a") as captionFile:
+    with open(f"{CAPTION_DIR}\\{content_hash}_{img_ext}.txt", "a") as captionFile:
         caption = caption.replace('\r\n', '***').replace('\n', '***').replace('•••', '***')
 
         # Only write captions if they do not exist yet
@@ -58,7 +58,7 @@ def _uploadMeme(image, caption):
     _uploadImage(image, _tempDirectory(), filename)   
 
     # Upload meme to server
-    captions, duplicate_caption = _handleCaptionUpload(content_hash, caption)
+    captions, duplicate_caption = _handleCaptionUpload(content_hash, caption, ext.lower())
 
     return content_hash, duplicate_caption,\
         {filename: {'file': f"{_tempDirectory(True)}/{filename}", 'type': image.content_type.split("/")[0], 
