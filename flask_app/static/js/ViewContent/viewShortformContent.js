@@ -8,7 +8,7 @@ const processData = function () {
     loadingContent.style.display = "flex";
 
     processURL = "/processViewShortform";
-    route = {'link_href': `/viewShortformContent/${currentOption.textContent}`, 
+    route = {'link_href': `/viewShortformContent/${JSON.parse(currentOption.value).name}`, 
                     'repeat': "/viewShortformContent", 'repeatMessage': 'View More Content'};
 
 

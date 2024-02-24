@@ -1,5 +1,7 @@
 import mysql.connector
 import hashlib
+import itertools
+
 from cryptography.fernet import Fernet
 
 from flask_app.utils.PropertiesReader import PropertiesReader
@@ -55,7 +57,7 @@ class database:
 
     def createTables(self, purge=False, data_path='flask_app/database/'):
         # Create new tables
-        tables = {"users": "purge", 'comicData': 'purge', 'showData': 'purge'}
+        tables = {"users": "purge", 'comicData': 'purge', 'showData': 'purge', 'shortContentData': 'purge'}
 
         for table in tables:
             if purge and tables[table] == "purge":
@@ -67,6 +69,17 @@ class database:
 
 
     def insertRows(self, table, columns, parameters):
+        cnx = mysql.connector.connect(host     = self.host,
+                                      user     = self.user,
+                                      password = self.password,
+                                      port     = self.port,
+                                      database = self.database,
+                                      charset  = 'latin1'
+                                     )
+        
+        cursor = cnx.cursor()
+
+
         col_string = ", ".join(columns)
 
         parameter_format_list = ['%s'] * len(columns)
@@ -74,9 +87,11 @@ class database:
 
         insert_statement = f"INSERT IGNORE INTO {table} ({col_string}) VALUES ({param_string});"
 
-        # Replace all instances of "NULL" with None then run query
-        for row in parameters:
-            self.query(insert_statement, row)
+        cursor.executemany(insert_statement, parameters)
+        cnx.commit()
+        
+        cursor.close()
+        cnx.close()
 
     
     def storeComic(self, comic_id, comic_name, comic_franchise, comic_author, comic_loc, comic_series="", has_chapters=0):
@@ -90,16 +105,45 @@ class database:
 
         return comicData[0]
 
-    def storeShow(self, show_id, show_episode, show_name, show_ep_num, show_search_dir, show_thumb, show_loc):
+    def storeShow(self, data):
+        all_prepared_data = []
+
+        for row in data:
+            prepared_data = (row[0], row[1].encode('utf-8'), row[2].encode('utf-8'), row[3].encode('utf-8'), 
+                          row[4].encode('utf-8'), row[5].encode('utf-8'), row[6].encode('utf-8'))
+            
+            all_prepared_data.append(prepared_data)
+
+        
         self.insertRows('showData',
                         ['show_id', 'show_episode', 'show_name', 'show_ep_num', 'show_search_dir', 'show_thumb', 'show_loc'],
-                        [[show_id, show_episode.encode('utf-8'), show_name.encode('utf-8'), show_ep_num.encode('utf-8'), 
-                          show_search_dir.encode('utf-8'), show_thumb.encode('utf-8'), show_loc.encode('utf-8')]])
+                        all_prepared_data)
         
     def getShow(self, show_id):
         showData = self.query("SELECT * FROM showData WHERE show_id=%s", [show_id])
 
         return showData[0]
+    
+
+    def storeShortContent(self, data):
+        all_prepared_data = []
+
+        # Prepare data for executemany statement
+        for row in data:
+            prepared_data = (row[0], row[1].encode('utf-8'), row[2].encode('utf-8'), row[3].encode('utf-8'), row[4].encode('utf-8'),
+                             row[5].encode('utf-8'), row[6].encode('utf-8'), row[7], row[8].encode('utf-8'))
+            
+            all_prepared_data.append(prepared_data)
+
+        self.insertRows('shortContentData',
+                        ['content_id', 'content_name', 'content_type', 'content_loc', 'search_dir_name', 'source_dir_name', 'content_style', 'has_caption', 'caption_loc'],
+                        all_prepared_data)
+
+        
+    def getShortContent(self, content_id):
+        shortContentData = self.query("SELECT * FROM shortContentData WHERE content_id=%s", [content_id])
+
+        return shortContentData[0]
 
     def createUser(self, user='user', password='user', role='user'):
         users = self.query(f"SELECT * FROM users WHERE username = '{user}'")

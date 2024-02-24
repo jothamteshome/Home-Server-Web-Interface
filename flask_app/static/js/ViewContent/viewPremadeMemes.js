@@ -8,7 +8,7 @@ const processData = function () {
     loadingContent.style.display = "flex";
 
     processURL = "/processPremadeMemes";
-    route = {'link_href': `/viewPremadeMemes/${currentOption.textContent}`, 
+    route = {'link_href': `/viewPremadeMemes/${JSON.parse(currentOption.value).name}`, 
                     'repeat': "/viewPremadeMemes", 'repeatMessage': 'View More Memes'};
 
     return recieveChunkedFromServer();

@@ -2,7 +2,7 @@ let processURL = null;
 let route = null;
 let rowHeight = null;
 let galleryRows = null;
-let prevOptions = { 'name': null, 'source_dir': null, 'sorting': 'A-Z', 'videosFirst': false };
+let prevOptions = { 'name': null, 'sorting': 'A-Z', 'videosFirst': false };
 let retreiveMoreData = false;
 let allContentLoaded = false;
 let alwaysReload = false;
@@ -19,7 +19,7 @@ const showLoadingWheel = function (loadingMessageText) {
 
 
 const setPrevOptions = function (data) {
-    prevOptions = {'name': data.name, 'source_dir': data.source_dir, 'sorting': data.sorting, 'videosFirst': data.videosFirst };
+    prevOptions = {'name': data.name, 'sorting': data.sorting, 'videosFirst': data.videosFirst };
 
     sessionStorage.setItem('prevOptions', JSON.stringify(prevOptions));
 }
@@ -64,7 +64,6 @@ const recieveChunkedFromServer = function (loading_more) {
     prevOptions = getPrevOptions()
 
     if (data.name === prevOptions.name &&
-        data.source_dir === prevOptions.source_dir &&
         data.sorting === prevOptions.sorting &&
         data.sorting !== "shuffle" &&
         data.videosFirst === prevOptions.videosFirst ||

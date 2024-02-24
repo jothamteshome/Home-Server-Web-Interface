@@ -5,6 +5,7 @@ import re
 from ctypes import wintypes, windll
 from flask import session, current_app
 from flask_app.utils.database import database
+import mysql
 db = database()
 
 # Opens json file containing directories
@@ -187,6 +188,8 @@ def _addShowsToDatabase():
 
                 show_contents.extend(_collectShowContent(show_dir_path))
 
+                add_to_database = []
+
                 if show_dir in SHOW_SUBDIRS:
                     for subdir in SHOW_SUBDIRS[show_dir]:
                         subdir_path = f"{show_dir_path}{subdir}"
@@ -201,16 +204,19 @@ def _addShowsToDatabase():
 
                     thumbnail = thumbnails.get(title, "")
 
-                    db.storeShow(show_id=hash(show[1]), show_episode=show[0], show_name=show_dir, show_ep_num=title,
-                                 show_search_dir=search_dir.split("\\")[-1], show_thumb=thumbnail, show_loc=show[1])
+                    add_to_database.append((hash(show[1]), show[0], show_dir, title, search_dir.split("\\")[-1], thumbnail, show[1]))
                     
                     db_entries.discard(show[1])
+
+                db.storeShow(add_to_database)
                     
 
     for show_dir_path in data['retrieve-show-content-dirs']['extra-directories']:
         show_contents = []
 
         show_contents.extend(_collectShowContent(show_dir_path))
+
+        add_to_database = []
 
         for show in show_contents:
             show_name_split = show[0].split(" - ")
@@ -220,10 +226,179 @@ def _addShowsToDatabase():
             if len(show_name_split) > 1:
                 title = show_name_split[0].strip()
 
-            db.storeShow(show_id=hash(show[1]), show_episode=show[0], show_name=show_dir_path.split("\\")[-1], show_ep_num=title,
-                        show_search_dir="Extra Content", show_thumb="", show_loc=show[1])
+
+            add_to_database.append((hash(show[1]), show[0], show_dir_path.split("\\")[-1], title, "Extra Content", "", show[1]))
             
             db_entries.discard(show[1])
 
-        for entry in db_entries:
-            db.query('DELETE FROM showData WHERE show_loc=%s', [entry])
+        db.storeShow(add_to_database)
+
+    for entry in db_entries:
+        db.query('DELETE FROM showData WHERE show_loc=%s', [entry])
+
+
+# Validates if content should be displayed
+def _validContent(contentName):
+    VALID_EXTENSIONS = {'mp4', 'mov', 'jpg', 'jpeg', 'png', 'gif'}
+
+    ext = contentName.split(".")[-1].lower()
+
+    if ext in VALID_EXTENSIONS:
+        return True
+    
+    return False
+
+
+def _checkCaptionExistence(directory, content_name):
+    caption_dir = _tryListDir(f"{directory}\\Captions")
+
+    split_name = content_name.split(".")
+    name, ext = ".".join(split_name[:-1]), split_name[-1].lower()
+
+    caption_name = f"{name}_{ext}.txt"
+
+    if not caption_dir or caption_name not in caption_dir:
+        return False
+    
+    return f"{directory}\\Captions\\{caption_name}"
+
+
+def _addPremadeMemes():
+    data = _openJSONDirectoriesFile()
+
+    VIDEO_EXTENSIONS = {'mp4', 'mov'}
+
+    db_entries = {entry['content_loc'].decode('utf-8') for entry in db.query("SELECT content_loc FROM shortContentData WHERE content_style=%s", ['Premade Meme'])}
+
+    SEARCH_DIRS = data['conditionally-included-routes']['premade-memes-dirs']
+
+    for search_dir in SEARCH_DIRS:
+        search_dir_name = search_dir.split("\\")[-1]
+        
+        content_directories = _tryListDir(search_dir)
+
+        for content_dir in content_directories:
+            content_dir_name = content_dir.split("\\")[-1]
+            content_dir_path = f"{search_dir}\\{content_dir}"
+
+            add_to_database = []
+
+            for subdir in data['conditionally-included-routes']['premade-memes-subdirs']:
+                subdir_path = f"{content_dir_path}{subdir}"
+
+                for content in _tryListDir(subdir_path):
+                    ext = content.split(".")[-1].lower()
+
+                    if _validContent(content):
+                        content_path = f"{subdir_path}\\{content}"
+                        
+                        content_type = "image" if ext not in VIDEO_EXTENSIONS else "video"
+
+                        caption_loc = _checkCaptionExistence(content_dir, content)
+
+                        has_caption = 0 if not caption_loc else 1
+
+                        if not has_caption:
+                            caption_loc = ""
+                        
+                        add_to_database.append((hash(content_path), content, content_type, content_path, search_dir_name, content_dir_name, 'Premade Meme', has_caption, caption_loc))
+
+                        db_entries.discard(content_path)
+
+            db.storeShortContent(add_to_database)
+
+    for entry in db_entries:
+        db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
+
+
+def _addShortformContent():
+    data = _openJSONDirectoriesFile()
+
+    VIDEO_EXTENSIONS = {'mp4', 'mov'}
+
+    db_entries = {entry['content_loc'].decode('utf-8') for entry in db.query("SELECT content_loc FROM shortContentData WHERE content_style=%s", ['Shortform Content'])}
+
+    SEARCH_DIRS = data['short-form-search-dirs']
+
+    for search_dir in SEARCH_DIRS:
+        search_dir_name = search_dir.split("\\")[-1]
+
+        content_directories = _tryListDir(search_dir)
+
+        for content_dir in content_directories:
+            content_dir_name = content_dir.split("\\")[-1]
+            content_dir_path = f"{search_dir}\\{content_dir}"
+
+            if "Uploaded Content" in _tryListDir(content_dir_path):
+                content_dir_path = f"{content_dir_path}\\Uploaded Content"
+
+            add_to_database = []
+
+            for subdir in ["\\Images", "\\Scraped Content", "\\Videos"]:
+                subdir_path = f"{content_dir_path}{subdir}"
+
+                for content in _tryListDir(subdir_path):
+                    ext = content.split(".")[-1].lower()
+
+                    if _validContent(content):
+                        content_path = f"{subdir_path}\\{content}"
+
+                        content_type = "image" if ext not in VIDEO_EXTENSIONS else "video"
+
+                        caption_loc = _checkCaptionExistence(content_dir, content)
+
+                        has_caption = 0 if not caption_loc else 1
+
+                        if not has_caption:
+                            caption_loc = ""
+
+                        add_to_database.append((hash(content_path), content, content_type, content_path, search_dir_name, content_dir_name, 'Shortform Content', has_caption, caption_loc))
+
+                        db_entries.discard(content_path)
+
+            db.storeShortContent(add_to_database)
+
+
+    for entry in db_entries:
+        db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
+
+
+def _addFinalizedMemes():
+    data = _openJSONDirectoriesFile()
+
+    db_entries = {entry['content_loc'].decode('utf-8') for entry in db.query("SELECT content_loc FROM shortContentData WHERE content_style=%s", ['Finalized Meme'])}
+
+    VIDEO_EXTENSIONS = {'mp4', 'mov'}
+
+    content_dir = data['conditionally-included-routes']['finalized-memes-dir']
+    content_dir_name = content_dir.split("\\")[-1]
+
+    add_to_database = []
+
+    for subdir in data['conditionally-included-routes']['finalized-memes-subdirs']:
+        subdir_path = f"{content_dir}{subdir}"
+
+        for content in _tryListDir(subdir_path):
+            ext = content.split(".")[-1].lower()
+
+            if _validContent(content):
+                content_path = f"{subdir_path}\\{content}"
+                
+                content_type = "image" if ext not in VIDEO_EXTENSIONS else "video"
+
+                caption_loc = _checkCaptionExistence(content_dir, content)
+
+                has_caption = 0 if not caption_loc else 1
+
+                if not has_caption:
+                    caption_loc = ""
+
+                add_to_database.append((hash(content_path), content, content_type, content_path, 'Finalized Meme', content_dir_name, 'Finalized Meme', has_caption, caption_loc))
+                
+                db_entries.discard(content_path)
+
+    db.storeShortContent(add_to_database)
+
+    for entry in db_entries:
+        db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
+

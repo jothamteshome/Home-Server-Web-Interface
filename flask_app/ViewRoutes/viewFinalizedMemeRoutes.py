@@ -5,7 +5,10 @@ from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template, cond_render_template
 from flask_app.utils.createdMemeHandling import _retreiveMemeCaptions
 from flask_app.utils.globalUtils import _openJSONDirectoriesFile, _tempDirectory
-from flask_app.utils.displayContent import collectFinalizedMemes, retreiveFinalizedMemes, _hideFilename
+from flask_app.utils.displayContent import collectFinalizedMemes, retreiveFinalizedMemes, _decodeDBData
+from flask_app.utils.database import database
+
+db = database()
 
 # Displays route to show finalized memes template
 @app.route('/viewFinalizedMemes')
@@ -13,7 +16,7 @@ from flask_app.utils.displayContent import collectFinalizedMemes, retreiveFinali
 @clear_temp
 def viewFinalizedMemes():
     return cond_render_template('viewContent/viewFinalizedMemes.html', contentList=retreiveFinalizedMemes(), 
-                                cond_statement="finalized-memes-dirs" in _openJSONDirectoriesFile()['conditionally-included-routes'])
+                                cond_statement="finalized-memes-dir" in _openJSONDirectoriesFile()['conditionally-included-routes'])
 
 
 # Returns finalized meme image data
@@ -28,15 +31,27 @@ def processFinalizedMemes():
 
 
 # Returns data from temp directory for singular finalized meme
-@app.route('/viewFinalizedMemes/<accessType>/<contentName>')
+@app.route('/viewFinalizedMemes/<accessType>/<content_id>')
 @login_required
-def singleFinalizedMeme(accessType, contentName):
-    contentName = _hideFilename(contentName, decode=True)
-    content_hash = contentName.split('.')[0]
+def singleFinalizedMeme(accessType, content_id):
+    contentData = _decodeDBData(db.getShortContent(content_id))
 
-    captions = _retreiveMemeCaptions(content_hash, existingOnly=True)
+    img_data = {'name': contentData['content_name'], 'data': {'file': f"{_tempDirectory(True)}/{contentData['content_name']}", 'type': contentData['content_type']}}
 
-    img_data = [{'name': contentName, 'data': {'file': f"{_tempDirectory(True)}/{contentName}", 'type': 'image', 'captions': captions}}]
+    if contentData['has_caption']:
+        caption_loc = contentData['caption_loc']
+
+        captions = []
+
+        with open(caption_loc, "r") as captionFile:
+            for line in captionFile:
+                line = line.strip()
+                captions.append("\n\n".join(line.split("***")))
+
+        img_data['data']['captions'] = captions
+
+
+    content_hash = contentData['content_name'].split('.')[0]
 
     success_data = {'message': f"Currently viewing captions for {content_hash}", 
                     'alt': f"Meme with finalized caption",
@@ -46,4 +61,4 @@ def singleFinalizedMeme(accessType, contentName):
         success_data['href'] = "/uploadFinalizedMeme"
         success_data['button-text'] = "Upload Another Meme"
     
-    return render_template('displayReturnedContent.html', img_data=img_data, success=success_data)
+    return render_template('displayReturnedContent.html', img_data=[img_data], success=success_data)

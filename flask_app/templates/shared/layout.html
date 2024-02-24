@@ -48,7 +48,7 @@
                     <p class="link">View</p>
                     <ul class="drop-content" id="view">
                         <li><a class="link" href="/viewComics">Comics</a></li>
-                        {% if "finalized-memes-dirs" in cond_routes %}
+                        {% if "finalized-memes-dir" in cond_routes %}
                             <li><a class="link" href="/viewFinalizedMemes">Finalized Memes</a></li>
                         {% endif %}
                         {% if "premade-memes-dirs" in cond_routes %}
@@ -86,7 +86,7 @@
 
                 <div class="link-element"><a class="link" href="/viewComics">View Comics</a></div>
                 
-                {% if "finalized-memes-dirs" in cond_routes %}
+                {% if "finalized-memes-dir" in cond_routes %}
                     <div class="link-element"><a class="link" href="/viewFinalizedMemes">View Finalized Memes</a></div>
                 {% endif %}
                 {% if "premade-memes-dirs" in cond_routes %}

@@ -69,19 +69,19 @@ def _validContent(contentName):
     return False
 
 
-def _distributeBatches(filenames, directory):
-    data_batches = {'directory': directory, 'batches': {}}
+def _distributeBatches(filenames):
+    data_batches = {}
 
     batch_num = -BATCHED_SEND_COUNT
 
     for i, file_data in enumerate(filenames):
         if i % BATCHED_SEND_COUNT == 0:
             batch_num += BATCHED_SEND_COUNT
-            data_batches['batches'][batch_num] = []
+            data_batches[batch_num] = []
 
-        data_batches['batches'][batch_num].append(file_data)
+        data_batches[batch_num].append(file_data)
 
-    data_batches['batches'][batch_num].append(('CONTENT_END', "CONTENT_END", 'CONTENT_END'))
+    data_batches[batch_num].append(('CONTENT_END', "CONTENT_END", 'CONTENT_END', 'CONTENT_END'))
 
     with open(_dataBatchesFile(), 'w') as jsonFile:
         json.dump(data_batches, jsonFile)
@@ -90,7 +90,7 @@ def _distributeBatches(filenames, directory):
 def _loadBatchFromJSON(displayed):
     with open(_dataBatchesFile(), "r") as jsonFile:
         data = json.load(jsonFile)
-        return data['directory'], data['batches'][str(displayed)]
+        return data[str(displayed)]
 
 
 # Handles the shuffling of data in a way that batched returns
@@ -121,7 +121,7 @@ def _handleBatch(file_data, altText):
             contentEnd = True
             continue
 
-        filename_dict[_hideFilename(file[0])] = {'file': f"{_tempDirectory(True)}/{file[0]}", 'type': file[2], 'alt': altText}
+        filename_dict[file[2]] = {'file': f"{_tempDirectory(True)}/{file[0]}", 'type': file[3], 'alt': altText}
 
     if contentEnd:
         filename_dict['CONTENT_END'] = {"file": 'CONTENT_END', 'type': "CONTENT_END", 'alt': 'CONTENT_END'}
@@ -148,7 +148,7 @@ def _sortComics(fileDict, sorting):
         return dict(sorted(tempAuthorSort.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0]))))
 
 def _decodeDBData(data):
-    convertFunc = {'comic_id': str, 'show_id': str, 'has_chapters': int}
+    convertFunc = {'comic_id': str, 'show_id': str, 'content_id': str, 'has_caption': int, 'has_chapters': int}
 
     for column in data:
         data[column] = data[column].decode('utf-8') if column not in convertFunc else convertFunc[column](data[column])
@@ -329,48 +329,69 @@ def _listNames(directory):
 def collectShortformFolders():
     SEARCH_DIRS = _openJSONDirectoriesFile()['short-form-search-dirs']
 
+    SEARCH_DIRS = db.query("SELECT search_dir_name FROM shortContentData WHERE content_style=%s GROUP BY search_dir_name ORDER BY search_dir_name", ['Shortform Content'])
+    SEARCH_DIRS = [search_dir['search_dir_name'].decode('utf-8') for search_dir in SEARCH_DIRS]
+
     validNames = []
 
     for directory in SEARCH_DIRS:
-        dir_name = directory.split("\\")[-1]
-        validNames.append({'name': f"--- {dir_name} --- ", 'disabled': True})
-        validNames.extend(sorted(_listNames(directory), key=lambda x: x['name']))
+        validNames.append({'name': f"--- {directory} ---", 'disabled': True})
+
+        names = db.query("SELECT source_dir_name FROM shortContentData WHERE content_style=%s AND search_dir_name=%s GROUP BY source_dir_name", ['Shortform Content', directory])
+        names = [name['source_dir_name'].decode('utf-8') for name in names]
+
+        formatted_data = []
+
+        for name in names:
+            formatted_data.append({'name': name, 'data': json.dumps({'name': "__".join(name.split(" "))})})
+
+        validNames.extend(sorted(formatted_data, key=lambda x: x['name'].lower()))
 
     return validNames
 
 
 # Pull all shortform content from selected folder name
-def pullShortformContent(name, directory, displayed, resetFile, sorting, videosFirst):
-    VIDEO_EXTENSIONS = {'mp4', 'mov'}
+def pullShortformContent(source_name, displayed, resetFile, sorting, videosFirst):
+    source_name = " ".join(source_name.split("__"))
+
+    content = {'image': db.query("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s AND content_type='image'", ['Shortform Content', source_name]),
+               'video': db.query("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s AND content_type='video'", ['Shortform Content', source_name])}
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
 
-    SUBDIRS = ["\\Images", "\\Scraped Content", "\\Videos"]
-
     if videosFirst:
-        SUBDIRS.reverse()
+        content = dict(sorted(content.items(), reverse=True))
 
     if _dataBatchesFile(name_only=True) not in _tryListDir(_dataBatchesFile(dir_only=True)):
         filenames = []
 
-        for subdir in SUBDIRS:
-            subdir_files = []
-            for content in _tryListDir(f"{directory}{subdir}"):
-                ext = content.split(".")[-1].lower()
+        for content_type in content:
+            shortformContentData = content[content_type]
 
-                if _validContent(content):
-                    subdir_files.append((_urlsafe(content), f"{directory}{subdir}\\{content}", 
-                                    "image" if ext not in VIDEO_EXTENSIONS else "video"))
-                    
-            filenames.extend(_sortStyle(subdir_files, sorting))
+            content_type_data = []
 
+            for i, row in enumerate(shortformContentData):
+                shortformContentData[i] = _decodeDBData(row)
+
+                id = shortformContentData[i]['content_id']
+                name = shortformContentData[i]['content_name']
+                type = shortformContentData[i]['content_type']
+                loc = shortformContentData[i]['content_loc']
+
+                content_type_data.append((name, loc, id, type))
+            
+            filenames.extend(_sortStyle(content_type_data, sorting))
+        print(filenames)
+
+        
         if sorting == "shuffle":
             filenames = _sortStyle(filenames, sorting)
 
-        _distributeBatches(filenames, directory)
 
-    return _handleBatch(_loadBatchFromJSON(displayed)[1], f'Image/Video from {name}')
+        _distributeBatches(filenames)
+
+    return _handleBatch(_loadBatchFromJSON(displayed), f'Image/Video from {source_name}')
 
 
 ####################################################################
@@ -380,55 +401,54 @@ def pullShortformContent(name, directory, displayed, resetFile, sorting, videosF
 
 # Collect all valid folders with premade memes
 def collectPremadeMemeAuthors():
-    SEARCH_DIRS = _openJSONDirectoriesFile()['conditionally-included-routes']['premade-memes-dirs']
     validNames = []
 
+    SEARCH_DIRS = db.query("SELECT search_dir_name FROM shortContentData WHERE content_style=%s GROUP BY search_dir_name ORDER BY search_dir_name DESC", ['Premade Meme'])
+    SEARCH_DIRS = [search_dir['search_dir_name'].decode('utf-8') for search_dir in SEARCH_DIRS]
+
     for directory in SEARCH_DIRS:
-        source_dir = directory.split("\\")[-1]
-        source_dir = f"--- {source_dir} ---"
-        validNames.append({'name': source_dir, 'disabled': True})
+        validNames.append({'name': f"--- {directory} ---", 'disabled': True})
 
-        names = _tryListDir(directory)
+        names = db.query("SELECT source_dir_name FROM shortContentData WHERE content_style=%s AND search_dir_name=%s GROUP BY source_dir_name", ['Premade Meme', directory])
+        names = [name['source_dir_name'].decode('utf-8') for name in names]
 
-        directory_valid = []
+        formatted_data = []
 
         for name in names:
-            directory_valid.append({'name': name, 'data': json.dumps({'name': name, 'source_dir': f"{directory}\\{name}"})})
-        
-        validNames.extend(sorted(directory_valid, key=lambda x: x['name'].lower()))
+            formatted_data.append({'name': name, 'data': json.dumps({'name': "__".join(name.split(" "))})})
+
+        validNames.extend(sorted(formatted_data, key=lambda x: x['name'].lower()))
 
     return validNames
 
 
 # Pull premade meme data from long storage and move to temp directory
-def pullPremadeMemes(name, directory, displayed, resetFile, sorting):
-    VIDEO_EXTENSIONS = {'mp4', 'mov'}
+def pullPremadeMemes(source_name, displayed, resetFile, sorting):
+    source_name = " ".join(name.split("__"))
 
-    premadeMemeSubdirs = _openJSONDirectoriesFile()['conditionally-included-routes']['premade-memes-subdirs']
+    premadeMemeData = db.query("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s", ['Premade Meme', source_name])
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
 
     if _dataBatchesFile(name_only=True) not in _tryListDir(_dataBatchesFile(dir_only=True)):
-        filenames = []
+        content = []
 
-        for subdir in premadeMemeSubdirs:
-            subdir_files = []
-            for content in _tryListDir(f"{directory}{subdir}"):
-                ext = content.split(".")[-1].lower()
+        for i, row in enumerate(premadeMemeData):
+            premadeMemeData[i] = _decodeDBData(row)
 
-                if _validContent(content):
-                    subdir_files.append((_urlsafe(content), f"{directory}{subdir}\\{content}", 
-                                    "image" if ext not in VIDEO_EXTENSIONS else "video"))
-                    
-            filenames.extend(_sortStyle(subdir_files, sorting))
+            id = premadeMemeData[i]['content_id']
+            name = premadeMemeData[i]['content_name']
+            type = premadeMemeData[i]['content_type']
+            loc = premadeMemeData[i]['content_loc']
 
-        _distributeBatches(filenames, directory)
-
-        if sorting == "shuffle":
-            filenames = _sortStyle(filenames, sorting)
+            content.append((name, loc, id, type))
         
-    return _handleBatch(_loadBatchFromJSON(displayed)[1], f'Image/Video by {name}')
+        content = _sortStyle(content, sorting)
+
+        _distributeBatches(content)
+    
+    return _handleBatch(_loadBatchFromJSON(displayed), f"Image/Video by {source_name}")
 
 
 ####################################################################
@@ -438,25 +458,32 @@ def pullPremadeMemes(name, directory, displayed, resetFile, sorting):
 
 # Retrieves data of finalized memes that exist
 def retreiveFinalizedMemes():
-    IMG_DIR = _openJSONDirectoriesFile()['conditionally-included-routes']['finalized-memes-dirs']['image-directory']
-
-    return [{'name': "Finalized Memes", 'data': json.dumps({'name': "Finalized Memes", 'source_dir': IMG_DIR})}]
+    return [{'name': "Finalized Memes", 'data': json.dumps({'name': "Finalized Memes"})}]
 
 
 # Handles collection of finalized memes
 def collectFinalizedMemes(displayed, resetFile, sorting):
-    IMG_DIR = _openJSONDirectoriesFile()['conditionally-included-routes']['finalized-memes-dirs']['image-directory']
+    finalizedMemeData = db.query("SELECT * FROM shortContentData WHERE content_style=%s", ['Finalized Meme'])
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
 
     if _dataBatchesFile(name_only=True) not in _tryListDir(_dataBatchesFile(dir_only=True)):
         filenames = []
-        for content in _tryListDir(IMG_DIR):
-            filenames.append((content, f"{IMG_DIR}\\{content}", 'image'))
 
+        for i, row in enumerate(finalizedMemeData):
+            finalizedMemeData[i] = _decodeDBData(row)
+
+            id = finalizedMemeData[i]['content_id']
+            name = finalizedMemeData[i]['content_name']
+            type = finalizedMemeData[i]['content_type']
+            loc = finalizedMemeData[i]['content_loc']
+
+            filenames.append((name, loc, id, type))
+        
         filenames = _sortStyle(filenames, sorting)
 
-        _distributeBatches(filenames, IMG_DIR)
 
-    return _handleBatch(_loadBatchFromJSON(displayed)[1], "Finalized meme image")
+        _distributeBatches(filenames)
+
+    return _handleBatch(_loadBatchFromJSON(displayed), "Finalized meme image")
