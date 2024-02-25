@@ -99,6 +99,9 @@ const processData = function () {
 }
 
 const showsPageOnShow = function () {
+    const form = document.querySelector('.form');
+    form.style.display = "flex";   
+
     findSelected();
 }
 

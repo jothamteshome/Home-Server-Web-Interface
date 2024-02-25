@@ -84,3 +84,8 @@ const processData = function() {
     sendBatchedImagesToServer('/processUploadShortform', route);
 
 }
+
+window.addEventListener('pageshow', function() {
+    const form = document.querySelector('.form');
+    form.style.display = "flex";   
+})

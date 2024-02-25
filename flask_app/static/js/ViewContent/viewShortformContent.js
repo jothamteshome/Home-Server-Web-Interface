@@ -6,12 +6,6 @@ const processData = function () {
     const form = document.querySelector('.form');
     form.style.display = "none";
 
-    const loadingContent = document.querySelector('.loadingContent');
-    const loadingMessage = loadingContent.querySelector('.loadingMessage');
-
-    loadingMessage.textContent = `Preparing images of ${currentOption.textContent}`;
-    loadingContent.style.display = "flex";
-
     const sorting = document.querySelector('input[type="radio"][name="sorting"]:checked').value;
     const videosFirst = document.querySelector('input[type="checkbox"][name="videosFirst"]:checked');
 
@@ -24,6 +18,12 @@ window.addEventListener('load', function () {
     title.text = title.text.split(" - ")[0] + " - Shortform Content";
 
 })
+
+window.addEventListener('pageshow', function () {
+    const form = document.querySelector('.form');
+    form.style.display = "flex";
+})
+
 
 // Listen for button to be clicked
 submitButton.addEventListener('click', processData);

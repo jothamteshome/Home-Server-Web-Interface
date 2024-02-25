@@ -11,7 +11,7 @@
 
 
 .form {
-    display: flex;
+    display: none;
     flex-direction: column;
     width: 25rem;
     min-height: 30vh;

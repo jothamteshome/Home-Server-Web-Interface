@@ -84,7 +84,10 @@ const processData = function () {
 
 // Onshow event handler for comics page
 const comicsPageOnShow = function () {
-    findSelected();
+    const form = document.querySelector('.form');
+    form.style.display = "flex";   
+
+    findSelected(); 
 }
 
 

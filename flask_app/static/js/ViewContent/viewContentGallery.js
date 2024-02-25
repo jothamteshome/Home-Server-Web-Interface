@@ -1,6 +1,31 @@
 const routeMap = {'viewShortformContent': 'shortformData', 'viewPremadeMemes': 'premadeMemeData', 'viewFinalizedMemes': 'finalizedMemeData'};
+const messageMap = {'viewShortformContent': 'shortformData', 'viewPremadeMemes': 'premadeMemeData', 'viewFinalizedMemes': 'Finalized Captioned Memes'};
 let retreiveMoreData = false;
 let allContentLoaded = false;
+
+const preparationMessage = function (linkData) {
+    const route = linkData[0];
+    const source_name = linkData[2].replaceAll("__", " ")
+
+    let message = null;
+
+    switch (route) {
+        case "viewShortformContent":
+            message = `Preparing images of ${source_name}`;
+            break;
+        case "viewPremadeMemes":
+            message = `Preparing ${source_name} Memes`;
+            break;
+        case "viewFinalizedMemes":
+            message = `Preparing Finalized Captioned Memes`;
+            break;
+        default:
+            message = `Preparing Content Gallery`;
+            break;
+    }
+
+    return message;
+}
 
 
 // Reveals the loading wheel
@@ -68,6 +93,12 @@ const handlePageLoad = function () {
 
     const linkData = window.location.href.split('://')[1].replace(window.location.host, '').slice(1).split("/");
     const source_name = linkData[2];
+
+    const loadingContent = document.querySelector('.loadingContent');
+    const loadingMessage = loadingContent.querySelector('.loadingMessage');
+
+    loadingMessage.textContent = preparationMessage(linkData);
+    loadingContent.style.display = "flex";
 
     const title = document.getElementsByTagName('title')[0];
     title.text = `${title.text.split(" - ")[0]} - ${source_name.replaceAll("__", " ")} Content Gallery`;

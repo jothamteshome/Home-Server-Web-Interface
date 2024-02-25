@@ -100,5 +100,8 @@ const processData = function() {
 }
 
 window.onpageshow = function() {
+    const form = document.querySelector('.form');
+    form.style.display = "flex";   
+
     checkFilesUploaded();
 }

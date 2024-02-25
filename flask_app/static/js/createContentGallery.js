@@ -3,7 +3,8 @@ let displayedCount = 0;
 // Build content gallery display section
 const displayImages = function (img_data, route) {
     const loadingContent = document.querySelector('.loadingContent');
-
+    const loadingMessage = loadingContent.querySelector('.loadingMessage');
+    loadingContent.style.display = "none";
     loadingContent.style.display = "none";
 
     // Locate main section
