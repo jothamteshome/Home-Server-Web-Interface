@@ -1,7 +1,10 @@
 const mainSection = document.getElementsByTagName('main')[0];
+const submitButton = document.querySelector('.submit');
 
 // Build options container and individual options
 const displayOptions = function (comic_data, optionName) {
+    const loadingContent = document.querySelector('.loadingContent');
+
     loadingContent.style.display = "none";
 
     const optionContainer = document.createElement('div');
@@ -94,3 +97,6 @@ window.addEventListener('load', function () {
 
 
 window.addEventListener('pageshow', comicsPageOnShow);
+
+// Listen for button to be clicked
+submitButton.addEventListener('click', processData);

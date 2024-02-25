@@ -59,3 +59,34 @@ def singleShortformContent(name, content_id):
                     'href': "/viewShortformContent", 'button-text': "View More Images", 'loop': True}
     
     return render_template('displayReturnedContent.html', img_data=[img_data], success=success_data)
+
+
+@app.route('/shortformData/<name>/<content_type_first>/<sorting>', methods=['POST'])
+@login_required
+def getShortformData(name, content_type_first, sorting):
+    form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
+    displayed = int(form_fields['displayed'])
+    sorting = sorting.lower()
+    resetFile = form_fields['resetFile'] == "true"
+    videosFirst = content_type_first == "video"
+
+    content = pullShortformContent(name, displayed, resetFile, sorting, videosFirst)
+    route = {'link_href': f"/viewShortformContent/{name}", 'repeat': "/viewShortformContent", 'repeatMessage': 'View More Content'}
+
+    return json.dumps({'data': content, 'route': route})
+
+
+@app.route('/viewShortformContent/Gallery/<name>/<sorting>/<content_type_first>')
+@login_required
+def viewShortformGallery(name, content_type_first, sorting):
+    return render_template('viewContent/viewContentGallery.html')
+
+@app.route('/viewShortformContent/Gallery/<name>/<sorting>')
+@login_required
+def viewShortformGalleryDefaultSort(name, sorting):
+    return render_template('viewContent/viewContentGallery.html')
+
+@app.route('/viewShortformContent/Gallery/<name>')
+@login_required
+def viewShortformGalleryDefault(name):
+    return render_template('viewContent/viewContentGallery.html')

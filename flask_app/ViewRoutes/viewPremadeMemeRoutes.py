@@ -59,3 +59,28 @@ def singlePremadeMeme(name, content_id):
                     'href': "/viewPremadeMemes", 'button-text': "View More Memes", 'loop': True}
     
     return render_template('displayReturnedContent.html', img_data=[img_data], success=success_data)
+
+
+@app.route('/premadeMemeData/<name>/<content_type_first>/<sorting>', methods=['POST'])
+@login_required
+def getPremadeData(name, content_type_first, sorting):
+    form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
+    displayed = int(form_fields['displayed'])
+    sorting = sorting.lower()
+    resetFile = form_fields['resetFile'] == "true"
+    
+    content = pullPremadeMemes(name, displayed, resetFile, sorting)
+    route = {'link_href': f"/viewPremadeMemes/{name}", 'repeat': "/viewPremadeMemes", 'repeatMessage': 'View More Memes'}
+
+    return json.dumps({'data': content, 'route': route})
+
+
+@app.route('/viewPremadeMemes/Gallery/<name>/<sorting>')
+@login_required
+def viewPremadeGallery(name, sorting):
+    return render_template('viewContent/viewContentGallery.html')
+
+@app.route('/viewPremadeMemes/Gallery/<name>')
+@login_required
+def viewPremadeGalleryDefault(name):
+    return render_template('viewContent/viewContentGallery.html')

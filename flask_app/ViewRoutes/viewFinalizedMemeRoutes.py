@@ -62,3 +62,21 @@ def singleFinalizedMeme(accessType, content_id):
         success_data['button-text'] = "Upload Another Meme"
     
     return render_template('displayReturnedContent.html', img_data=[img_data], success=success_data)
+
+
+@app.route('/finalizedMemeData/<name>/<content_type_first>/<sorting>', methods=['POST'])
+@login_required
+def getFinalizedMemeData(name, content_type_first, sorting):
+    form_fields = form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
+    displayed = int(form_fields['displayed'])
+    resetFile = form_fields['resetFile'] == "true"
+
+    content = collectFinalizedMemes(displayed, resetFile, 'shuffle')
+    route = {'link_href': "/viewFinalizedMemes/Viewing", 'repeat': "/viewFinalizedMemes", 'repeatMessage': 'View More Memes'}
+
+    return json.dumps({'data': content, 'route': route})
+
+@app.route('/viewFinalizedMemes/Gallery/Finalized__Memes')
+@login_required
+def viewFinalizedMemeGallery():
+    return render_template('viewContent/viewContentGallery.html')

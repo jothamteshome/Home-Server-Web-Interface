@@ -1,26 +1,26 @@
+const submitButton = document.querySelector('.submit');
+
 // Pass folder name to backend using ajax POST request
 const processData = function () {
-    // Hide input form
-    prevOptions.sorting = "shuffle";
-    processURL = '/processFinalizedMemes';
-    route = {'link_href': "/viewFinalizedMemes/Viewing", 'repeat': "/viewFinalizedMemes", 'repeatMessage': 'View More Memes'};
-
-    return recieveChunkedFromServer();
+    window.location.href = "/viewFinalizedMemes/Gallery/Finalized__Memes"
 }
 
 window.addEventListener('load', function () {
     const form = document.querySelector('.form');
-    const title = document.getElementsByTagName('title')[0];
-    title.text = title.text + " - Viewing Finalized Memes";
-
     form.style.display = "none";
+
+    const title = document.getElementsByTagName('title')[0];
+    title.text = title.text.split(" - ")[0] + " - Finalized Memes";
+
+    const loadingContent = document.querySelector('.loadingContent');
+    const loadingMessage = loadingContent.querySelector('.loadingMessage');
 
     loadingMessage.textContent = `Preparing Finalized Captioned Memes`;
     loadingContent.style.display = "flex";
-})
 
-
-window.addEventListener('pageshow', function () {
-    if (getPrevPageLoc().search(`${getPageLocation()}/`) !== -1) { return; }
     processData();
 })
+
+
+// Listen for button to be clicked
+submitButton.addEventListener('click', processData);

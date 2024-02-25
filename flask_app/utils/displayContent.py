@@ -382,7 +382,6 @@ def pullShortformContent(source_name, displayed, resetFile, sorting, videosFirst
                 content_type_data.append((name, loc, id, type))
             
             filenames.extend(_sortStyle(content_type_data, sorting))
-        print(filenames)
 
         
         if sorting == "shuffle":
@@ -424,7 +423,7 @@ def collectPremadeMemeAuthors():
 
 # Pull premade meme data from long storage and move to temp directory
 def pullPremadeMemes(source_name, displayed, resetFile, sorting):
-    source_name = " ".join(name.split("__"))
+    source_name = " ".join(source_name.split("__"))
 
     premadeMemeData = db.query("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s", ['Premade Meme', source_name])
 

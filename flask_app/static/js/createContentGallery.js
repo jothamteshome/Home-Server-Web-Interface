@@ -1,16 +1,9 @@
-const submitButton = document.querySelector('.submit');
-const loadingContent = document.querySelector('.loadingContent');
-const loadingMessage = loadingContent.querySelector('.loadingMessage');
-
 let displayedCount = 0;
-
-const storeGalleryState = function (event) {
-    sessionStorage.setItem('prevDisplayedCount', displayedCount);
-    sessionStorage.setItem('scrollToElement', simmer(event.currentTarget));
-}
 
 // Build content gallery display section
 const displayImages = function (img_data, route) {
+    const loadingContent = document.querySelector('.loadingContent');
+
     loadingContent.style.display = "none";
 
     // Locate main section
@@ -42,7 +35,6 @@ const displayImages = function (img_data, route) {
         // Create link element to display images
         const link = document.createElement('a');
         link.classList.add('content');
-        link.addEventListener('click', storeGalleryState);
         link.href = `${route['link_href']}/${img}`;
 
         // Set image border to red if it is a duplicate image
@@ -103,6 +95,3 @@ const displayImages = function (img_data, route) {
 
 
 }
-
-// Listen for button to be clicked
-submitButton.addEventListener('click', processData);

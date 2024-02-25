@@ -1,7 +1,24 @@
 const mainSection = document.getElementsByTagName('main')[0];
+const submitButton = document.querySelector('.submit');
+
+// Reveals the loading wheel
+const showLoadingWheel = function (loadingMessageText) {
+    const optionContainer = document.querySelector('.optionsContainer');
+    const loadingContent = document.querySelector('.loadingContent');
+    const loadingMessage = loadingContent.querySelector('.loadingMessage');
+
+    if (optionContainer) { optionContainer.remove(); }
+
+    loadingMessage.textContent = loadingMessageText;
+    loadingContent.style.display = "flex";
+}
 
 const listShows = function(video_data, show_name) {
     const form = document.querySelector('.form');
+
+    const loadingContent = document.querySelector('.loadingContent');
+
+
     form.style.display = "none";
 
     loadingContent.style.display = "none";
@@ -94,3 +111,6 @@ window.addEventListener('load', function () {
 })
 
 window.addEventListener('pageshow', showsPageOnShow);
+
+// Listen for button to be clicked
+submitButton.addEventListener('click', processData);
