@@ -83,7 +83,7 @@ const processData = function () {
 
 
 // Onshow event handler for comics page
-const comicsPageOnShow = function () {
+window.comicsPageOnShow = function () {
     const form = document.querySelector('.form');
     form.style.display = "flex";   
 
@@ -99,7 +99,7 @@ window.addEventListener('load', function () {
 })
 
 
-window.addEventListener('pageshow', comicsPageOnShow);
+window.addEventListener('pageshow', window.comicsPageOnShow);
 
 // Listen for button to be clicked
 submitButton.addEventListener('click', processData);

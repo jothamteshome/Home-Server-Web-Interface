@@ -35,20 +35,6 @@ def processlogin():
         _tryRemoveFile(_dataBatchesFile())
         status.pop('role') 
         return json.dumps(status)
-    
-    
-@app.route('/processsignup', methods = ["POST","GET"])
-def processsignup():
-	form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-	status = db.createUser(form_fields['username'], form_fields['password'])
-
-	if status['success'] == 0:
-		return json.dumps(status)
-	else:
-		session['user_info'] = {'username': form_fields['username'], 'role': status['role']}
-		_tryRemoveFile(_dataBatchesFile())
-		status.pop('role') 
-		return json.dumps(status)
 
 
 @app.route('/')

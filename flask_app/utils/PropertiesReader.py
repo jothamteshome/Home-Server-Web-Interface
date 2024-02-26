@@ -13,5 +13,8 @@ class PropertiesReader:
     
     def getAdminUser(self, identifier):
         return self.__config_parser.get('admin_login', identifier)
+    
+    def getGuestUser(self, identifier):
+        return self.__config_parser.get('guest_login', identifier)
 
 

@@ -11,8 +11,7 @@ const getOptions = function(optionDataURL) {
 }
 
 window.addEventListener('load', function () {
-    const form = document.querySelector('.form');
-    form.style.display = 'none';
+    window.removeEventListener('pageshow', window.comicsPageOnShow)
 
     const title = document.getElementsByTagName('title')[0];
     title.text = title.text.split(" - ")[0] + " - Viewing Comic Options";

@@ -66,8 +66,6 @@ def streamShows(showName, show_id):
                     'alt': f"Image from {showName}",
                     'href': "/viewShows", 'button-text': "View More Shows"}
     
-    print(img_data[0]['data']['thumb'])
-    
     return render_template('displayReturnedContent.html', img_data=img_data, success=success_data)
 
 
