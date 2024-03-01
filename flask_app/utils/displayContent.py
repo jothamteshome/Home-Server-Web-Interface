@@ -74,17 +74,24 @@ def _distributeBatches(filenames):
 
     batch_num = -BATCHED_SEND_COUNT
 
+    databaseUpdate = []
+
     for i, file_data in enumerate(filenames):
+        prev_id, next_id = filenames[i-1][2], filenames[(i+1) % len(filenames)][2]
         if i % BATCHED_SEND_COUNT == 0:
             batch_num += BATCHED_SEND_COUNT
             data_batches[batch_num] = []
 
         data_batches[batch_num].append(file_data)
+        databaseUpdate.append([prev_id, next_id, file_data[2]])
 
     data_batches[batch_num].append(('CONTENT_END', "CONTENT_END", 'CONTENT_END', 'CONTENT_END'))
 
     with open(_dataBatchesFile(), 'w') as jsonFile:
         json.dump(data_batches, jsonFile)
+
+
+    db.updateShortContent(['prev_content_id', 'next_content_id'], databaseUpdate)
 
 
 def _loadBatchFromJSON(displayed):
@@ -148,7 +155,7 @@ def _sortComics(fileDict, sorting):
         return dict(sorted(tempAuthorSort.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0]))))
 
 def _decodeDBData(data):
-    convertFunc = {'comic_id': str, 'show_id': str, 'content_id': str, 'has_caption': int, 'has_chapters': int}
+    convertFunc = {'comic_id': str, 'show_id': str, 'content_id': str, 'prev_content_id': str, 'next_content_id': str, 'has_caption': int, 'has_chapters': int}
 
     for column in data:
         data[column] = data[column].decode('utf-8') if column not in convertFunc else convertFunc[column](data[column])

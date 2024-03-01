@@ -8,5 +8,7 @@ CREATE TABLE IF NOT EXISTS `shortContentData` (
 `content_style`         varbinary(128) NOT NULL                     COMMENT 'Finalized Meme, Premade meme, or general shortform content',
 `has_caption`           INT(1)         NOT NULL                     COMMENT 'Determines whether caption exists',
 `caption_loc`           varbinary(512) NULL                         COMMENT 'Location of caption if it exists',
+`prev_content_id`       BIGINT(64)                                  COMMENT 'The id to search for prev content with',
+`next_content_id`       BIGINT(64)                                  COMMENT 'The id to search for next content with',
 PRIMARY KEY (`content_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT="Contains sites shortform content";

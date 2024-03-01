@@ -131,13 +131,37 @@ class database:
         # Prepare data for executemany statement
         for row in data:
             prepared_data = (row[0], row[1].encode('utf-8'), row[2].encode('utf-8'), row[3].encode('utf-8'), row[4].encode('utf-8'),
-                             row[5].encode('utf-8'), row[6].encode('utf-8'), row[7], row[8].encode('utf-8'))
+                             row[5].encode('utf-8'), row[6].encode('utf-8'), row[7], row[8].encode('utf-8'), row[9].encode('utf-8'), row[10].encode('utf-8'))
             
             all_prepared_data.append(prepared_data)
 
         self.insertRows('shortContentData',
-                        ['content_id', 'content_name', 'content_type', 'content_loc', 'search_dir_name', 'source_dir_name', 'content_style', 'has_caption', 'caption_loc'],
+                        ['content_id', 'content_name', 'content_type', 'content_loc', 'search_dir_name', 'source_dir_name', 'content_style', 'has_caption', 'caption_loc', 'prev_content_id', 'next_content_id'],
                         all_prepared_data)
+        
+    
+    def updateShortContent(self, columns, data):
+        cnx = mysql.connector.connect(host     = self.host,
+                                      user     = self.user,
+                                      password = self.password,
+                                      port     = self.port,
+                                      database = self.database,
+                                      charset  = 'latin1'
+                                     )
+        
+        cursor = cnx.cursor()
+
+
+        col_string = ", ".join([f"{column}=%s" for column in columns])
+
+        updateStatement = f"UPDATE shortContentData SET {col_string} WHERE content_id=%s"
+
+        cursor.executemany(updateStatement, data)
+        cnx.commit()
+        
+        cursor.close()
+        cnx.close()
+
 
         
     def getShortContent(self, content_id):

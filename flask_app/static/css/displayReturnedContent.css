@@ -23,11 +23,32 @@
     margin-bottom: 3vh;
 }
 
+.content-wrapper .content-image {
+    position: relative;
+}
 
-.content-wrapper .content {
+.content-image .content {
     display: block;
     object-fit: contain;
     outline: 0.1rem solid #000000;
+}
+
+.content-image .image-selector {
+    position: absolute;
+    height: 100%;
+    width: 15%;
+    z-index: 1;
+    cursor: pointer;
+}
+
+#left-image-selector {
+    top: 0;
+    left: 0;
+}
+
+#right-image-selector {
+    top: 0;
+    right: 0;
 }
 
 

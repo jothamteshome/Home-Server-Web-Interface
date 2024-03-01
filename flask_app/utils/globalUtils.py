@@ -301,7 +301,7 @@ def _addPremadeMemesToDatabase():
                         if not has_caption:
                             caption_loc = ""
                         
-                        add_to_database.append((hash(content_path), content, content_type, content_path, search_dir_name, content_dir_name, 'Premade Meme', has_caption, caption_loc))
+                        add_to_database.append((hash(content_path), content, content_type, content_path, search_dir_name, content_dir_name, 'Premade Meme', has_caption, caption_loc, "", ""))
 
                         db_entries.discard(content_path)
 
@@ -352,7 +352,7 @@ def _addShortformContentToDatabase():
                         if not has_caption:
                             caption_loc = ""
 
-                        add_to_database.append((hash(content_path), content, content_type, content_path, search_dir_name, content_dir_name, 'Shortform Content', has_caption, caption_loc))
+                        add_to_database.append((hash(content_path), content, content_type, content_path, search_dir_name, content_dir_name, 'Shortform Content', has_caption, caption_loc, "", ""))
 
                         db_entries.discard(content_path)
 
@@ -393,7 +393,7 @@ def _addFinalizedMemesToDatabase():
                 if not has_caption:
                     caption_loc = ""
 
-                add_to_database.append((hash(content_path), content, content_type, content_path, 'Finalized Meme', content_dir_name, 'Finalized Meme', has_caption, caption_loc))
+                add_to_database.append((hash(content_path), content, content_type, content_path, 'Finalized Meme', content_dir_name, 'Finalized Meme', has_caption, caption_loc, "", ""))
                 
                 db_entries.discard(content_path)
 
