@@ -44,3 +44,8 @@ const processCredentials = function () {
 
 // Add onClick listener to submit button
 submitButton.addEventListener("click", processCredentials);
+window.addEventListener("keypress", function(event) {
+  if (event.key == "Enter"){
+    processCredentials();
+  }
+})

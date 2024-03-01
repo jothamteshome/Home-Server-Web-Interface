@@ -6,7 +6,6 @@
     grid-template-columns: repeat(auto-fill, 15.625rem);
     margin: 2vh 0;
     width: 80vw;
-    min-height: 83vh;
     justify-content: center;
 }
 
@@ -24,7 +23,7 @@
     border: 0.1rem solid #000000;
     transition: 0.2s;
     height: 15.625rem;
-    width: 15.625rem
+    width: 15.625rem;
 }
 
 /* Sizing for image and video tags*/
@@ -39,4 +38,15 @@
     scale: 1.05;
     transition: 0.2s;
     cursor: pointer;
+}
+
+@media (max-width: 650px) {
+    .main .contentGallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .contentGallery .content {
+        height: 40vw;
+        width: 40vw;
+    }
 }
