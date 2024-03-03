@@ -46,13 +46,13 @@
         <div class="content-image">
             <video class="content" alt="{{success['alt']}}" loading="lazy" 
                 src="{{filepath}}" {% if thumb_exists %} poster={{thumb_filepath}} {% endif %} 
-                controls {% if do_loop %} autoplay loop muted {% endif %} prev-id="{{img['data']['prev_id']}}" next-id="{{img['data']['next_id']}}">
+                controls {% if do_loop %} autoplay loop muted playsinline {% endif %} prev-id="{{img['data']['prev_id']}}" next-id="{{img['data']['next_id']}}">
             </video>
             
             {% if img.get('data', {}).get('prev_id', False) %}
                 {% set selector_path = success['link_href'] + '/' %}
-                <a class="image-selector" id="left-image-selector" href="{{selector_path}}{{img['data']['prev_id']}}"></a>
-                <a class="image-selector" id="right-image-selector" href="{{selector_path}}{{img['data']['next_id']}}"></a>
+                <a class="image-selector video-selector" id="left-image-selector" href="{{selector_path}}{{img['data']['prev_id']}}"></a>
+                <a class="image-selector video-selector" id="right-image-selector" href="{{selector_path}}{{img['data']['next_id']}}"></a>
             {% endif %}
         </div>
         {% endif %}

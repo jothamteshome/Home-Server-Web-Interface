@@ -35,11 +35,16 @@
 
 .content-image .image-selector {
     position: absolute;
-    height: 60%;
+    height: 100%;
     width: 15%;
     z-index: 1;
     cursor: pointer;
+    top: 0;
+}
+
+.content-image .video-selector {
     top: 20%;
+    height: 60%;
 }
 
 #left-image-selector {
@@ -81,6 +86,6 @@
 
 @media (max-width: 650px) {
     .content-image .image-selector {
-        width: 50%;
+        width: 25%;
     }
 }
