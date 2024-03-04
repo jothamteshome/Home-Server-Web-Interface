@@ -49,6 +49,8 @@ def _addComicsToDatabase():
         for subgenre in search_dir['sub-genres']:
             subgenre_dir = f"{search_dir['main-dir']}{subgenre}"
 
+            add_to_database = []
+
             for franchise in _tryListDir(subgenre_dir):
                 franchise_dir = f"{subgenre_dir}\\{franchise}"
 
@@ -70,15 +72,15 @@ def _addComicsToDatabase():
                         has_chapters = 1
                         for comic_part in dirContents[1]:
                             comic_part_loc = f"{dirContents[0]}\\{comic_part}"
-                            db.storeComic(comic_id=hash(comic_part_loc), comic_name=comic_part, comic_franchise=franchise, 
-                                          comic_series=comic, comic_author=author, comic_loc=comic_part_loc, has_chapters=0)
+                            add_to_database.append((hash(comic_part_loc), comic_part, franchise, comic, 0, author, comic_part_loc))
                             
                             db_entries.discard(comic_part_loc)
                             
-                    db.storeComic(comic_id=hash(comic_loc), comic_name=comic, comic_franchise=franchise, 
-                                      comic_author=author, comic_loc=comic_loc, has_chapters=has_chapters)
+                    add_to_database.append((hash(comic_loc), comic, franchise,"", has_chapters, author, comic_loc))
                     
                     db_entries.discard(comic_loc)
+            
+            db.storeComics(add_to_database)
 
     for entry in db_entries:
         db.query('DELETE FROM comicData WHERE comic_loc=%s', [entry])
@@ -148,7 +150,7 @@ def _addShowsToDatabase():
                     
                     db_entries.discard(show[1])
 
-                db.storeShow(add_to_database)
+                db.storeShows(add_to_database)
                     
 
     for show_dir_path in data['retrieve-show-content-dirs']['extra-directories']:
@@ -171,7 +173,7 @@ def _addShowsToDatabase():
             
             db_entries.discard(show[1])
 
-        db.storeShow(add_to_database)
+        db.storeShows(add_to_database)
 
     for entry in db_entries:
         db.query('DELETE FROM showData WHERE show_loc=%s', [entry])

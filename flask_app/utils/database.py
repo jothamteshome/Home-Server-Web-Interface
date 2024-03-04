@@ -94,18 +94,25 @@ class database:
         cnx.close()
 
     
-    def storeComic(self, comic_id, comic_name, comic_franchise, comic_author, comic_loc, comic_series="", has_chapters=0):
+    def storeComics(self, data):
+        all_prepared_data = []
+
+        for row in data:
+            prepared_data = (row[0], row[1].encode('utf-8'), row[2].encode('utf-8'), row[3].encode('utf-8'),
+                             row[4], row[5].encode('utf-8'), row[6].encode('utf-8'))
+            
+            all_prepared_data.append(prepared_data)
+
         self.insertRows('comicData', 
                         ['comic_id', 'comic_name', 'comic_franchise', 'comic_series', 'has_chapters', 'comic_author', 'comic_loc'], 
-                        [[comic_id, comic_name.encode('utf-8'), comic_franchise.encode('utf-8'), comic_series.encode('utf-8'), 
-                          has_chapters, comic_author.encode('utf-8'), comic_loc.encode('utf-8')]])
+                        all_prepared_data)
 
     def getComic(self, comic_id):
         comicData = self.query("SELECT * FROM comicData WHERE comic_id=%s", [comic_id])
 
         return comicData[0]
 
-    def storeShow(self, data):
+    def storeShows(self, data):
         all_prepared_data = []
 
         for row in data:
