@@ -3,7 +3,8 @@ import time
 from flask import Flask
 from flask_failsafe import failsafe
 from flask_app.utils.PropertiesReader import PropertiesReader
-from flask_app.utils.globalUtils import _deleteUserDataBatches, _deleteAllTempDirectores, _addComicsToDatabase, _addShowsToDatabase, _addAllShortContentToDatabase
+from flask_app.utils.globalUtils import _deleteUserDataBatches, _deleteAllTempDirectores
+from flask_app.utils.addDataToDatabase import _addComicsToDatabase, _addShowsToDatabase, _addAllShortContentToDatabase
 
 
 #--------------------------------------------------

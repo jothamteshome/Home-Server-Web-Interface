@@ -4,7 +4,8 @@ from flask import current_app as app
 from flask import redirect, request, session
 from flask_app import uploadRoutes
 from flask_app.ViewRoutes import viewComicsRoutes, viewFinalizedMemeRoutes, viewPremadeMemeRoutes, viewShortformRoutes, viewShowsRoutes
-from flask_app.utils.globalUtils import _tryRemoveFile, _dataBatchesFile, _addComicsToDatabase, _addShowsToDatabase, _addAllShortContentToDatabase
+from flask_app.utils.globalUtils import _tryRemoveFile, _dataBatchesFile
+from flask_app.utils.addDataToDatabase import _addComicsToDatabase, _addShowsToDatabase, _addAllShortContentToDatabase
 from flask_app.routeTools import clear_temp, render_template
 from flask_app.utils.database  import database
 db = database()
