@@ -22,7 +22,7 @@ const returnRouteData = function (route, success_data) {
 // Returns the correct message for number of duplicate images found in upload
 const returnUploadMessage = function (success_data) {
     totalCount += success_data.uploaded;
-    let message = `Successfully uploaded ${totalCount} images to ${success_data.folderName}`;
+    let message = `Successfully uploaded ${totalCount} images to ${folderName.value.trim()}`;
 
     if (success_data.duplicates === 0) {
         return message;
@@ -74,7 +74,7 @@ const getImageBatch = function () {
     let imageBatch = 0;
 
     while ((imageBatch < IMG_BATCH_SIZE) && (displayedCount + imageBatch) < fileUpload.files.length ) {
-        formData.append("captions", captions[displayedCount + imageBatch]);
+        if (captions[displayedCount + imageBatch]) { formData.append("captions", captions[displayedCount + imageBatch]); }
         formData.append("image", fileUpload.files[displayedCount + imageBatch]);
         imageBatch++;
     }

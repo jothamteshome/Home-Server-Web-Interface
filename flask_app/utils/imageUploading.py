@@ -147,14 +147,16 @@ def uploadImages(search_dir, source_name, captions, files):
     add_to_database = []
 
     for i, file in enumerate(files):
-        newUpload, filename, file_loc = _handleUploadTypeSemantics(contentPath, file, _generateContentHash(file), dir_info['separate_image_video'])
+        sha256hash = _generateContentHash(file)
+
+        newUpload, filename, file_loc = _handleUploadTypeSemantics(contentPath, file, sha256hash, dir_info['separate_image_video'])      
 
         # Save files in temp folder
         _uploadImage(file, f"{_tempDirectory()}", filename)
 
         try:
             # Upload meme to server
-            returnedCaptions, duplicate_caption, caption_loc = _handleCaptionUpload(contentPath, _generateContentHash(file), captions[i], file.content_type.split('/')[-1].lower())
+            returnedCaptions, duplicate_caption, caption_loc = _handleCaptionUpload(contentPath, sha256hash, captions[i], file.content_type.split('/')[-1].lower())
         except IndexError:
             returnedCaptions, duplicate_caption, caption_loc = [], False, None
 
