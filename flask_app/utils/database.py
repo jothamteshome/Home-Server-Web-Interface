@@ -57,10 +57,10 @@ class database:
 
     def createTables(self, purge=False, data_path='flask_app/database/'):
         # Create new tables
-        tables = {"users": "purge", 'comicData': 'purge', 'showData': 'purge', 'shortContentData': 'purge'}
+        tables = {"users": True, 'comicData': True, 'showData': True, 'shortContentData': True, 'uploadDirectories': True}
 
         for table in tables:
-            if purge and tables[table] == "purge":
+            if purge and tables[table]:
                 self.query(f'DROP TABLE IF EXISTS {table}')
 
 
@@ -93,6 +93,31 @@ class database:
         cursor.close()
         cnx.close()
 
+    def _decodeDBData(self, data):
+        convertFunc = {'comic_id': str, 'show_id': str, 'content_id': str, 'prev_content_id': str, 'next_content_id': str, 'has_caption': int, 'has_chapters': int}
+
+        for column in data:
+            data[column] = data[column].decode('utf-8') if column not in convertFunc else convertFunc[column](data[column])
+
+        return data
+
+    
+    def storeUploadDirectories(self, data):
+        all_prepared_data = []
+
+        for row in data:
+            prepared_data = (row[0].encode('utf-8'), row[1].encode('utf-8'), row[2], row[3])
+
+            all_prepared_data.append(prepared_data)
+
+        self.insertRows('uploadDirectories',
+                        ['section_name', 'section_directory', 'separate_uploaded_content', 'separate_image_video'],
+                        all_prepared_data)
+        
+    
+    def getAllUploadDirectories(self):
+        results = self.query("SELECT * FROM uploadDirectories ORDER BY %s", ['section_name'])
+
     
     def storeComics(self, data):
         all_prepared_data = []
@@ -110,7 +135,7 @@ class database:
     def getComic(self, comic_id):
         comicData = self.query("SELECT * FROM comicData WHERE comic_id=%s", [comic_id])
 
-        return comicData[0]
+        return self._decodeDBData(comicData[0])
 
     def storeShows(self, data):
         all_prepared_data = []
@@ -129,7 +154,7 @@ class database:
     def getShow(self, show_id):
         showData = self.query("SELECT * FROM showData WHERE show_id=%s", [show_id])
 
-        return showData[0]
+        return self._decodeDBData(showData[0])
     
 
     def storeShortContent(self, data):
@@ -174,7 +199,17 @@ class database:
     def getShortContent(self, content_id):
         shortContentData = self.query("SELECT * FROM shortContentData WHERE content_id=%s", [content_id])
 
-        return shortContentData[0]
+        return self._decodeDBData(shortContentData[0])
+    
+
+    def getDecodedData(self, table, WHERE_clause, params):
+        data = self.query(f"SELECT * FROM {table} WHERE {WHERE_clause}", params)
+
+        for i, row in enumerate(data):
+            data[i] = self._decodeDBData(row)
+
+        return data
+    
 
     def createUser(self, user='user', password='user', role='user'):
         users = self.query(f"SELECT * FROM users WHERE username = '{user}'")

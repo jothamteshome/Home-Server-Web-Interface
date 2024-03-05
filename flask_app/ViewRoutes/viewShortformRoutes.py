@@ -4,7 +4,7 @@ from flask import current_app as app
 from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template
 from flask_app.utils.globalUtils import _tempDirectory
-from flask_app.utils.displayContent import collectShortformFolders, pullShortformContent, _decodeDBData, _copyFilesToTemp
+from flask_app.utils.displayContent import collectShortformFolders, pullShortformContent, _copyFilesToTemp
 from flask_app.utils.database import database
 
 db = database()
@@ -22,7 +22,7 @@ def viewShortformContent():
 @login_required
 def singleShortformContent(name, content_id):
     split_name = " ".join(name.split("__"))
-    contentData = _decodeDBData(db.getShortContent(content_id))
+    contentData = db.getShortContent(content_id)
 
     _copyFilesToTemp([[contentData['content_name'], contentData['content_loc']]])
 

@@ -7,6 +7,9 @@ from flask_app.utils.createdMemeHandling import _uploadMeme
 from flask_app.utils.imageUploading import uploadImageSet
 from flask_app.utils.globalUtils import _openJSONDirectoriesFile
 from flask_app.utils.displayContent import _hideFilename
+from flask_app.utils.database import database
+
+db = database()
 
 ####################################################################
 #              FINALIZED MEME UPLOAD HANDLING                      #
@@ -55,7 +58,8 @@ def processUploadFinalizedMeme():
 @login_required
 @clear_temp
 def uploadShortformContent():
-    return cond_render_template('UploadContent/uploadShortformContent.html', 
+    genres = db.query("SELECT * FROM uploadDirectories")
+    return cond_render_template('UploadContent/upload.html', 
                                        genres=list(_openJSONDirectoriesFile()['upload-short-form-genres'].keys()), 
                                        cond_statement=session['user_info']['role'] == 'admin')
 

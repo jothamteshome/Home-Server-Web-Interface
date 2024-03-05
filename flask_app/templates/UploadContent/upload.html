@@ -15,9 +15,18 @@
 
 {% block maincontent %}
 <form class="form">
-    {% block uploadFormComponents %}{% endblock %}
+    <select class="dropdown-selector" name="genre" required>
+        {% for genre in genres %}
+            <option value={{genre}}>{{genre}}</option>
+        {% endfor %}
+    </select>
+    <input type='text' class="folder-name-input" placeholder="Insert Folder Name Here" name="name" required>
+    <textarea class="caption-section" rows="5" columns="33" placeholder="Insert Caption Here" name="caption" required></textarea>
     <label for="choose-images" class="file-selector-label">Upload Image(s)</label>
-    {% block uploadFormFiles %}{% endblock %}
+    
+    <input type="file" title="Upload shortform content" 
+    id="choose-images" class="file-selector" name="file" accept="image/*, video/*" multiple required>
+
     <input type="button" title="Submit fields for new image upload" value="Upload Image(s)" class="submit">
 </form>
 

@@ -4,7 +4,7 @@ from flask import current_app as app
 from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template
 from flask_app.utils.globalUtils import _tempDirectory
-from flask_app.utils.displayContent import retreiveShowContent, _copyFilesToTemp, _listShows, _decodeDBData
+from flask_app.utils.displayContent import retreiveShowContent, _copyFilesToTemp, _listShows
 from flask_app.utils.database import database
 db = database()
 
@@ -36,7 +36,6 @@ def processShows():
 @clear_temp
 def downloadTempShowContent(show_id):
     show = db.getShow(show_id)
-    show = _decodeDBData(show)
 
     filesToDownload = []
 
@@ -54,7 +53,7 @@ def downloadTempShowContent(show_id):
 @app.route('/viewShows/Watching/<showName>/<show_id>')
 @login_required
 def streamShows(showName, show_id):
-    show_data = _decodeDBData(db.getShow(show_id))
+    show_data = db.getShow(show_id)
     showName = " ".join(showName.split("__"))
     contentName = show_data['show_episode']
     temp_name = f"{_tempDirectory(True)}/{contentName}"

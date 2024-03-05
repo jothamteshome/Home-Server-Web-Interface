@@ -4,7 +4,7 @@ from flask import current_app as app
 from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template, cond_render_template
 from flask_app.utils.globalUtils import _openJSONDirectoriesFile, _tempDirectory
-from flask_app.utils.displayContent import collectPremadeMemeAuthors, pullPremadeMemes, _decodeDBData, _copyFilesToTemp
+from flask_app.utils.displayContent import collectPremadeMemeAuthors, pullPremadeMemes, _copyFilesToTemp
 from flask_app.utils.database import database
 
 db = database()
@@ -23,7 +23,7 @@ def viewPremadeMemes():
 @login_required
 def singlePremadeMeme(name, content_id):
     split_name = " ".join(name.split("__"))
-    contentData = _decodeDBData(db.getShortContent(content_id))
+    contentData = db.getShortContent(content_id)
 
     _copyFilesToTemp([[contentData['content_name'], contentData['content_loc']]])
 

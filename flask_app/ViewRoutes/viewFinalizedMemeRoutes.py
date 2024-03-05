@@ -5,7 +5,7 @@ from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template, cond_render_template
 from flask_app.utils.createdMemeHandling import _retreiveMemeCaptions
 from flask_app.utils.globalUtils import _openJSONDirectoriesFile, _tempDirectory
-from flask_app.utils.displayContent import collectFinalizedMemes, retreiveFinalizedMemes, _decodeDBData, _copyFilesToTemp
+from flask_app.utils.displayContent import collectFinalizedMemes, retreiveFinalizedMemes, _copyFilesToTemp
 from flask_app.utils.database import database
 
 db = database()
@@ -23,7 +23,7 @@ def viewFinalizedMemes():
 @app.route('/viewFinalizedMemes/<accessType>/<content_id>')
 @login_required
 def singleFinalizedMeme(accessType, content_id):
-    contentData = _decodeDBData(db.getShortContent(content_id))
+    contentData = db.getShortContent(content_id)
 
     _copyFilesToTemp([[contentData['content_name'], contentData['content_loc']]])
 

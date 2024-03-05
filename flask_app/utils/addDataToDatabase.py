@@ -191,8 +191,14 @@ def _addShortformContentToDatabase():
 
     SEARCH_DIRS = data['short-form-search-dirs']
 
+    uploadDirectories = []
+
     for search_dir in SEARCH_DIRS:
         search_dir_name = search_dir.split("\\")[-1]
+
+        uploadDirectories.append((search_dir_name, search_dir, 
+                                  search_dir_name in data['upload-shortform-special-criteria']["separate-uploaded-content"], 
+                                  search_dir_name in data['upload-shortform-special-criteria']["separate-image-video"]))
 
         content_directories = _tryListDir(search_dir)
 
@@ -229,6 +235,8 @@ def _addShortformContentToDatabase():
 
             db.storeShortContent(add_to_database)
 
+    db.storeUploadDirectories(uploadDirectories)
+
 
     for entry in db_entries:
         db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
@@ -246,8 +254,14 @@ def _addPremadeMemesToDatabase():
 
     SEARCH_DIRS = data['conditionally-included-routes']['premade-memes-dirs']
 
+    uploadDirectories = []
+
     for search_dir in SEARCH_DIRS:
         search_dir_name = search_dir.split("\\")[-1]
+
+        uploadDirectories.append((search_dir_name, search_dir, 
+                                  search_dir_name in data['upload-shortform-special-criteria']["separate-uploaded-content"], 
+                                  search_dir_name in data['upload-shortform-special-criteria']["separate-image-video"]))
         
         content_directories = _tryListDir(search_dir)
 
@@ -281,6 +295,8 @@ def _addPremadeMemesToDatabase():
 
             db.storeShortContent(add_to_database)
 
+    db.storeUploadDirectories(uploadDirectories)
+
     for entry in db_entries:
         db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
 
@@ -297,6 +313,8 @@ def _addFinalizedMemesToDatabase():
 
     content_dir = data['conditionally-included-routes']['finalized-memes-dir']
     content_dir_name = content_dir.split("\\")[-1]
+
+    db.storeUploadDirectories([(content_dir_name, content_dir, 0, 0)])
 
     add_to_database = []
 

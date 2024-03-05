@@ -43,30 +43,12 @@ def _copyFilesToTemp(filenames, subdir=""):
         dest.close()
 
 
-# Removes url-unsafe characters
-def _urlsafe(filename):    
-    filename = filename.replace("#", "")
-    return filename
-
-
 # Hides a filename behind base64 encoding scheme
 def _hideFilename(filename, decode=False):
     if decode:
         return base64.urlsafe_b64decode(filename).decode()
 
     return base64.urlsafe_b64encode(filename.encode()).decode()
-
-
-# Validates if content should be displayed
-def _validContent(contentName):
-    VALID_EXTENSIONS = {'mp4', 'mov', 'jpg', 'jpeg', 'png', 'gif'}
-
-    ext = contentName.split(".")[-1].lower()
-
-    if ext in VALID_EXTENSIONS:
-        return True
-    
-    return False
 
 
 def _distributeBatches(filenames):
@@ -154,17 +136,9 @@ def _sortComics(fileDict, sorting):
     else:
         return dict(sorted(tempAuthorSort.items(), key=cmp_to_key(lambda x, y: winsort()(x[0], y[0]))))
 
-def _decodeDBData(data):
-    convertFunc = {'comic_id': str, 'show_id': str, 'content_id': str, 'prev_content_id': str, 'next_content_id': str, 'has_caption': int, 'has_chapters': int}
-
-    for column in data:
-        data[column] = data[column].decode('utf-8') if column not in convertFunc else convertFunc[column](data[column])
-
-    return data
-
 
 def _handleDisplayingComic(comic_id):
-    comicData = _decodeDBData(db.getComic(comic_id))
+    comicData = db.getComic(comic_id)
     comic = []
 
     loc = comicData['comic_loc']
@@ -201,15 +175,13 @@ def _listComicNames():
 def collectComics(franchise_name, sorting):
     comicContents = {'name': franchise_name.strip(), 'data': {}}
 
-    comicData = db.query('SELECT * FROM comicData WHERE comic_franchise=%s AND comic_series=%s', [franchise_name.strip(), ""])
+    comicData = db.getDecodedData('comicData', 'comic_franchise=%s AND comic_series=%s', [franchise_name.strip(), ""])
 
-    for i, row in enumerate(comicData):
-        comicData[i] = _decodeDBData(row)
-
+    for row in comicData:
         id = row['comic_id']
-        name = comicData[i]['comic_name']
-        author = comicData[i]['comic_author']
-        series = comicData[i]['has_chapters']
+        name = row['comic_name']
+        author = row['comic_author']
+        series = row['has_chapters']
         title = name.replace(f"{author}", "").strip()
 
         comicContents['data'][title] = {'id': id, 'name': title, 'author': author, 'has_chapters': series}
@@ -222,17 +194,15 @@ def collectComics(franchise_name, sorting):
 def collectComicSeries(seriesData):
     comicSeriesContents = {'data': {}}
 
-    for i, row in enumerate(seriesData):
-        seriesData[i] = _decodeDBData(row)
-
+    for row in seriesData:
         id = row['comic_id']
-        name = seriesData[i]['comic_name']
-        author = seriesData[i]['comic_author']
+        name = row['comic_name']
+        author = row['comic_author']
 
     
         comicSeriesContents['data'][name] = {'id': id, 'name': name, 'author': author}
 
-    comicSeriesContents['name'] = seriesData[i]['comic_series'].replace(author, "").strip()
+    comicSeriesContents['name'] = row['comic_series'].replace(author, "").strip()
     comicSeriesContents['data'] = _sortComics(comicSeriesContents['data'], None)
 
     return comicSeriesContents
@@ -273,16 +243,14 @@ def retreiveShowContent(name, sorting):
     content = []
     thumbnails = []
     
-    showData = db.query("SELECT * FROM showData WHERE show_name=%s", [name])
+    showData = db.getDecodedData("showData", "show_name=%s", [name])
 
-    for i, row in enumerate(showData):
-        showData[i] = _decodeDBData(row)
-
-        id = showData[i]['show_id']
-        name = showData[i]['show_episode']
-        title = showData[i]['show_ep_num']
-        loc = showData[i]['show_loc']
-        thumb_loc = showData[i]['show_thumb']
+    for row in showData:
+        id = row['show_id']
+        name = row['show_episode']
+        title = row['show_ep_num']
+        loc = row['show_loc']
+        thumb_loc = row['show_thumb']
 
         content.append((name, loc, id, title, thumb_loc))
 
@@ -361,8 +329,8 @@ def collectShortformFolders():
 def pullShortformContent(source_name, displayed, resetFile, sorting, videosFirst):
     source_name = " ".join(source_name.split("__"))
 
-    content = {'image': db.query("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s AND content_type='image'", ['Shortform Content', source_name]),
-               'video': db.query("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s AND content_type='video'", ['Shortform Content', source_name])}
+    content = {'image': db.getDecodedData("shortContentData", "content_style=%s AND source_dir_name=%s AND content_type='image'", ['Shortform Content', source_name]),
+               'video': db.getDecodedData("shortContentData", "content_style=%s AND source_dir_name=%s AND content_type='video'", ['Shortform Content', source_name])}
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
@@ -378,13 +346,11 @@ def pullShortformContent(source_name, displayed, resetFile, sorting, videosFirst
 
             content_type_data = []
 
-            for i, row in enumerate(shortformContentData):
-                shortformContentData[i] = _decodeDBData(row)
-
-                id = shortformContentData[i]['content_id']
-                name = shortformContentData[i]['content_name']
-                type = shortformContentData[i]['content_type']
-                loc = shortformContentData[i]['content_loc']
+            for row in shortformContentData:
+                id = row['content_id']
+                name = row['content_name']
+                type = row['content_type']
+                loc = row['content_loc']
 
                 content_type_data.append((name, loc, id, type))
             
@@ -432,7 +398,7 @@ def collectPremadeMemeAuthors():
 def pullPremadeMemes(source_name, displayed, resetFile, sorting):
     source_name = " ".join(source_name.split("__"))
 
-    premadeMemeData = db.query("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s", ['Premade Meme', source_name])
+    premadeMemeData = db.getDecodedData("shortContentData", "content_style=%s AND source_dir_name=%s", ['Premade Meme', source_name])
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
@@ -440,13 +406,11 @@ def pullPremadeMemes(source_name, displayed, resetFile, sorting):
     if _dataBatchesFile(name_only=True) not in _tryListDir(_dataBatchesFile(dir_only=True)):
         content = []
 
-        for i, row in enumerate(premadeMemeData):
-            premadeMemeData[i] = _decodeDBData(row)
-
-            id = premadeMemeData[i]['content_id']
-            name = premadeMemeData[i]['content_name']
-            type = premadeMemeData[i]['content_type']
-            loc = premadeMemeData[i]['content_loc']
+        for row in premadeMemeData:
+            id = row['content_id']
+            name = row['content_name']
+            type = row['content_type']
+            loc = row['content_loc']
 
             content.append((name, loc, id, type))
         
@@ -469,7 +433,7 @@ def retreiveFinalizedMemes():
 
 # Handles collection of finalized memes
 def collectFinalizedMemes(displayed, resetFile, sorting):
-    finalizedMemeData = db.query("SELECT * FROM shortContentData WHERE content_style=%s", ['Finalized Meme'])
+    finalizedMemeData = db.getDecodedData("shortContentData", "content_style=%s", ['Finalized Meme'])
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
@@ -477,13 +441,11 @@ def collectFinalizedMemes(displayed, resetFile, sorting):
     if _dataBatchesFile(name_only=True) not in _tryListDir(_dataBatchesFile(dir_only=True)):
         filenames = []
 
-        for i, row in enumerate(finalizedMemeData):
-            finalizedMemeData[i] = _decodeDBData(row)
-
-            id = finalizedMemeData[i]['content_id']
-            name = finalizedMemeData[i]['content_name']
-            type = finalizedMemeData[i]['content_type']
-            loc = finalizedMemeData[i]['content_loc']
+        for row in finalizedMemeData:
+            id = row['content_id']
+            name = row['content_name']
+            type = row['content_type']
+            loc = row['content_loc']
 
             filenames.append((name, loc, id, type))
         

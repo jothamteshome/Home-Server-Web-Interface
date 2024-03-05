@@ -5,7 +5,7 @@ from flask import current_app as app
 from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template
 from flask_app.utils.globalUtils import _tempDirectory
-from flask_app.utils.displayContent import  collectComics, collectComicSeries, _copyFilesToTemp, _listComicNames, _decodeDBData, _handleDisplayingComic
+from flask_app.utils.displayContent import  collectComics, collectComicSeries, _copyFilesToTemp, _listComicNames, _handleDisplayingComic
 from flask_app.utils.database import database
 db = database()
 
@@ -35,8 +35,8 @@ def getComicData(franchise_name, sorting):
 
 @app.route('/comicData/<series_id>', methods=['POST'])
 def getSeriesData(series_id):
-    comicData = _decodeDBData(db.getComic(series_id))
-    seriesData = db.query('SELECT * FROM comicData WHERE comic_series=%s', [comicData['comic_name']])
+    comicData = db.getComic(series_id)
+    seriesData = db.getDecodedData('comicData', 'comic_series=%s', [comicData['comic_name']])
 
     return json.dumps(collectComicSeries(seriesData))
 
