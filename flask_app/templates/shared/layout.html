@@ -34,13 +34,7 @@
             <div class="links">
                 {% if role == 'admin' %}
                     <div class="link-element">
-                        <p class="link">Upload</p>
-                            <ul class="drop-content" id="upload">
-                            {% if "finalized-memes-dir" in cond_routes %}
-                                <li><a class="link" href="/uploadFinalizedMeme">Finalized Meme</a></li>
-                            {% endif %}
-                            <li><a class="link" href="/uploadShortformContent">Images & Clips</a></li>
-                        </ul>
+                        <a class="link" href="/uploadContent">Upload Content</a>
                     </div>
                 {% endif %}
 
@@ -78,10 +72,7 @@
             <!-- Display for links after menu bar icon is selected -->
             <div class="menu-bar-display">
                 {% if role == 'admin' %}
-                    {% if "finalized-memes-dir" in cond_routes %}
-                        <div class="link-element"><a class="link" href="/uploadFinalizedMeme">Upload Finalized Meme</a></div>
-                    {% endif %}
-                    <div class="link-element"><a class="link" href="/uploadShortformContent">Upload Images & Clips</a></div>
+                    <div class="link-element"><a class="link" href="/uploadContent">Upload Content</a></div>
                 {% endif %}
 
                 <div class="link-element"><a class="link" href="/viewComics">View Comics</a></div>

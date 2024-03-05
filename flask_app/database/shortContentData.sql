@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS `shortContentData` (
 `content_id`            BIGINT(64)     NOT NULL                     COMMENT 'The id to search for content with',
-`content_name`          varbinary(256) NOT NULL UNIQUE    		    COMMENT 'The name of the content',
+`content_name`          varbinary(256) NOT NULL         		    COMMENT 'The name of the content',
 `content_type`          varbinary(16)  NOT NULL                     COMMENT 'Whether content is image or video',
 `content_loc`           varbinary(512) NOT NULL                     COMMENT 'Location of the content',
 `search_dir_name`       varbinary(256) NOT NULL                     COMMENT 'Name of outer-most ancestor directory',

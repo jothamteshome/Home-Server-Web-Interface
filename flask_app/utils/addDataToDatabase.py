@@ -316,7 +316,7 @@ def _addFinalizedMemesToDatabase():
     content_dir = data['conditionally-included-routes']['finalized-memes-dir']
     content_dir_name = content_dir.split("\\")[-1]
 
-    db.storeUploadDirectories([("Finalized Memes", content_dir, "Finalized Memes", 0, 0, 1)])
+    db.storeUploadDirectories([("Finalized Meme", content_dir, "Finalized Memes", 0, 0, 1)])
 
     add_to_database = []
 

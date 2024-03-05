@@ -3,7 +3,6 @@ import json
 from flask import current_app as app
 from flask import request
 from flask_app.routeTools import clear_temp, login_required, render_template, cond_render_template
-from flask_app.utils.createdMemeHandling import _retreiveMemeCaptions
 from flask_app.utils.globalUtils import _openJSONDirectoriesFile, _tempDirectory
 from flask_app.utils.displayContent import collectFinalizedMemes, retreiveFinalizedMemes, _copyFilesToTemp
 from flask_app.utils.database import database

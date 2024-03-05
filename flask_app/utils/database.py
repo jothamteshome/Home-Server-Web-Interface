@@ -120,6 +120,12 @@ class database:
                         all_prepared_data)
         
     
+    def getUploadDirectory(self, dir_name):
+        uploadDirectory = self.query("SELECT * FROM uploadDirectories WHERE section_name=%s", [dir_name])
+
+        return self._decodeDBData(uploadDirectory[0])
+    
+
     def getAllUploadDirectories(self):
         directoryOptions = []
 

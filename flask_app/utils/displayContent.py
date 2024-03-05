@@ -43,14 +43,6 @@ def _copyFilesToTemp(filenames, subdir=""):
         dest.close()
 
 
-# Hides a filename behind base64 encoding scheme
-def _hideFilename(filename, decode=False):
-    if decode:
-        return base64.urlsafe_b64decode(filename).decode()
-
-    return base64.urlsafe_b64encode(filename.encode()).decode()
-
-
 def _distributeBatches(filenames):
     data_batches = {}
 
