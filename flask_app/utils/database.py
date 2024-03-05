@@ -111,12 +111,12 @@ class database:
         all_prepared_data = []
 
         for row in data:
-            prepared_data = (row[0].encode('utf-8'), row[1].encode('utf-8'), row[2].encode('utf-8'), row[3], row[4], row[5])
+            prepared_data = (row[0].encode('utf-8'), row[1].encode('utf-8'), row[2].encode('utf-8'), row[3], row[4])
 
             all_prepared_data.append(prepared_data)
 
         self.insertRows('uploadDirectories',
-                        ['section_name', 'section_directory', 'section_content_style', 'separate_uploaded_content', 'separate_image_video', 'single_upload_limit'],
+                        ['section_name', 'section_directory', 'section_content_style', 'separate_uploaded_content', 'separate_image_video'],
                         all_prepared_data)
         
     

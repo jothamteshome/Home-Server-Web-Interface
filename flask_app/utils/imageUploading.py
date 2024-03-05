@@ -163,9 +163,9 @@ def uploadImages(search_dir, source_name, captions, files):
         if newUpload:
             file_hash = str(hash(file_loc))
             if caption_loc:
-                add_to_database.append((hash(file_loc), filename, file.content_type, file_loc, search_dir, source_name, dir_info['section_content_style'], 1, caption_loc, "", ""))
+                add_to_database.append((hash(file_loc), filename, file.content_type.split("/")[0], file_loc, search_dir, source_name, dir_info['section_content_style'], 1, caption_loc, "", ""))
             else:                
-                add_to_database.append((hash(file_loc), filename, file.content_type, file_loc, search_dir, source_name, dir_info['section_content_style'], 0, "", "", ""))
+                add_to_database.append((hash(file_loc), filename, file.content_type.split("/")[0], file_loc, search_dir, source_name, dir_info['section_content_style'], 0, "", "", ""))
         else:
             original_file = db.getDecodedData("SELECT * FROM shortContentData where content_loc=%s", [file_loc])[0]
             file_hash = original_file['content_id']
