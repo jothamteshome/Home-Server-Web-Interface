@@ -93,11 +93,16 @@ class database:
         cursor.close()
         cnx.close()
 
-    def _decodeDBData(self, data):
-        convertFunc = {'comic_id': str, 'show_id': str, 'content_id': str, 'prev_content_id': str, 'next_content_id': str, 'has_caption': int, 'has_chapters': int}
 
+    def _decodeDBData(self, data):
         for column in data:
-            data[column] = data[column].decode('utf-8') if column not in convertFunc else convertFunc[column](data[column])
+            try:
+                data[column] = data[column].decode('utf-8') 
+            except AttributeError:
+                if '_id' in column:
+                    data[column] = str(data[column])
+                else:
+                    continue
 
         return data
 
@@ -106,17 +111,29 @@ class database:
         all_prepared_data = []
 
         for row in data:
-            prepared_data = (row[0].encode('utf-8'), row[1].encode('utf-8'), row[2], row[3])
+            prepared_data = (row[0].encode('utf-8'), row[1].encode('utf-8'), row[2].encode('utf-8'), row[3], row[4], row[5])
 
             all_prepared_data.append(prepared_data)
 
         self.insertRows('uploadDirectories',
-                        ['section_name', 'section_directory', 'separate_uploaded_content', 'separate_image_video'],
+                        ['section_name', 'section_directory', 'section_content_style', 'separate_uploaded_content', 'separate_image_video', 'single_upload_limit'],
                         all_prepared_data)
         
     
     def getAllUploadDirectories(self):
-        results = self.query("SELECT * FROM uploadDirectories ORDER BY %s", ['section_name'])
+        directoryOptions = []
+
+        content_styles = self.getDecodedData("SELECT section_content_style FROM uploadDirectories GROUP BY section_content_style ORDER BY section_content_style")
+
+        for content_style in content_styles:
+            directoryOptions.append({'name': f"--- {content_style['section_content_style']} ---", 'disabled': True})
+
+            results = self.getDecodedData("SELECT section_name FROM uploadDirectories WHERE section_content_style=%s ORDER BY %s", [content_style['section_content_style'], 'section_name'])
+
+            directoryOptions.extend([{'name': result['section_name']} for result in results])
+
+        return directoryOptions
+        
 
     
     def storeComics(self, data):
@@ -202,8 +219,8 @@ class database:
         return self._decodeDBData(shortContentData[0])
     
 
-    def getDecodedData(self, table, WHERE_clause, params):
-        data = self.query(f"SELECT * FROM {table} WHERE {WHERE_clause}", params)
+    def getDecodedData(self, statement, params=None):
+        data = self.query(statement, params)
 
         for i, row in enumerate(data):
             data[i] = self._decodeDBData(row)

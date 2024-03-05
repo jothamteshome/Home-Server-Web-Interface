@@ -36,7 +36,7 @@ def getComicData(franchise_name, sorting):
 @app.route('/comicData/<series_id>', methods=['POST'])
 def getSeriesData(series_id):
     comicData = db.getComic(series_id)
-    seriesData = db.getDecodedData('comicData', 'comic_series=%s', [comicData['comic_name']])
+    seriesData = db.getDecodedData('SELECT * FROM comicData WHERE comic_series=%s', [comicData['comic_name']])
 
     return json.dumps(collectComicSeries(seriesData))
 

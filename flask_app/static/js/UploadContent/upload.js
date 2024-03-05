@@ -1,5 +1,23 @@
 const uploadFileButton = document.querySelector('.file-selector-label');
 const fileUpload = document.querySelector('.file-selector');
+const submitButton = document.querySelector('.submit');
+
+const dropdownSelector = document.querySelector('.dropdown-selector');
+
+let currentOption = document.getElementsByTagName('option')[0];
+
+// Determine currently selected option in dropdown menu
+const findSelected = function () {
+    const options = dropdownSelector.getElementsByTagName('option');
+
+    for (const option of options) {
+        if (option.disabled) {
+            option.selected = false;
+        } else if (option.selected) {
+            currentOption = option;
+        }
+    }
+}
 
 const validateForm = function () {
     const form = document.querySelector('.form');
@@ -31,3 +49,7 @@ fileUpload.onchange = function () {
     checkFilesUploaded();
 }
 
+window.addEventListener('pageshow', function() {
+    const form = document.querySelector('.form');
+    form.style.display = "flex";   
+})

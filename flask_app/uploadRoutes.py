@@ -58,9 +58,9 @@ def processUploadFinalizedMeme():
 @login_required
 @clear_temp
 def uploadShortformContent():
-    genres = db.query("SELECT * FROM uploadDirectories")
+    options = db.getAllUploadDirectories()
     return cond_render_template('UploadContent/upload.html', 
-                                       genres=list(_openJSONDirectoriesFile()['upload-short-form-genres'].keys()), 
+                                       options=options, 
                                        cond_statement=session['user_info']['role'] == 'admin')
 
 

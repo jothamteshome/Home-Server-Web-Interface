@@ -175,7 +175,7 @@ def _listComicNames():
 def collectComics(franchise_name, sorting):
     comicContents = {'name': franchise_name.strip(), 'data': {}}
 
-    comicData = db.getDecodedData('comicData', 'comic_franchise=%s AND comic_series=%s', [franchise_name.strip(), ""])
+    comicData = db.getDecodedData("SELECT * FROM comicData WHERE comic_franchise=%s AND comic_series=%s", [franchise_name.strip(), ""])
 
     for row in comicData:
         id = row['comic_id']
@@ -243,7 +243,7 @@ def retreiveShowContent(name, sorting):
     content = []
     thumbnails = []
     
-    showData = db.getDecodedData("showData", "show_name=%s", [name])
+    showData = db.getDecodedData("SELECT * FROM showData WHERE show_name=%s", [name])
 
     for row in showData:
         id = row['show_id']
@@ -329,8 +329,8 @@ def collectShortformFolders():
 def pullShortformContent(source_name, displayed, resetFile, sorting, videosFirst):
     source_name = " ".join(source_name.split("__"))
 
-    content = {'image': db.getDecodedData("shortContentData", "content_style=%s AND source_dir_name=%s AND content_type='image'", ['Shortform Content', source_name]),
-               'video': db.getDecodedData("shortContentData", "content_style=%s AND source_dir_name=%s AND content_type='video'", ['Shortform Content', source_name])}
+    content = {'image': db.getDecodedData("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s AND content_type='image'", ['Shortform Content', source_name]),
+               'video': db.getDecodedData("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s AND content_type='video'", ['Shortform Content', source_name])}
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
@@ -398,7 +398,7 @@ def collectPremadeMemeAuthors():
 def pullPremadeMemes(source_name, displayed, resetFile, sorting):
     source_name = " ".join(source_name.split("__"))
 
-    premadeMemeData = db.getDecodedData("shortContentData", "content_style=%s AND source_dir_name=%s", ['Premade Meme', source_name])
+    premadeMemeData = db.getDecodedData("SELECT * FROM shortContentData WHERE content_style=%s AND source_dir_name=%s", ['Premade Meme', source_name])
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())
@@ -433,7 +433,7 @@ def retreiveFinalizedMemes():
 
 # Handles collection of finalized memes
 def collectFinalizedMemes(displayed, resetFile, sorting):
-    finalizedMemeData = db.getDecodedData("shortContentData", "content_style=%s", ['Finalized Meme'])
+    finalizedMemeData = db.getDecodedData("SELECT * FROM shortContentData WHERE content_style=%s", ['Finalized Meme'])
 
     if resetFile:
         _tryRemoveFile(_dataBatchesFile())

@@ -16,8 +16,12 @@
 {% block maincontent %}
 <form class="form">
     <select class="dropdown-selector" name="genre" required>
-        {% for genre in genres %}
-            <option value={{genre}}>{{genre}}</option>
+        {% for option in options %}
+            {% if option.get('disabled', False) %}
+                <option disabled>{{option['name']}}</option>
+            {% else %}
+                <option value="{{option['name']}}">{{option['name']}}</option>
+            {% endif %}
         {% endfor %}
     </select>
     <input type='text' class="folder-name-input" placeholder="Insert Folder Name Here" name="name" required>
