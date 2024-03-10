@@ -259,7 +259,7 @@ def _addPremadeMemesToDatabase():
     for search_dir in SEARCH_DIRS:
         search_dir_name = search_dir.split("\\")[-1]
 
-        uploadDirectories.append((search_dir_name, search_dir, "Premade Memes",
+        uploadDirectories.append((search_dir_name, search_dir, "Premade Meme",
                                   search_dir_name in data['upload-shortform-special-criteria']["separate-uploaded-content"], 
                                   search_dir_name in data['upload-shortform-special-criteria']["separate-image-video"]))
         
@@ -314,7 +314,7 @@ def _addFinalizedMemesToDatabase():
     content_dir = data['conditionally-included-routes']['finalized-memes-dir']
     content_dir_name = content_dir.split("\\")[-1]
 
-    db.storeUploadDirectories([("Finalized Meme", content_dir, "Finalized Memes", 0, 0)])
+    db.storeUploadDirectories([("Finalized Memes", content_dir, "Finalized Meme", 0, 0)])
 
     add_to_database = []
 

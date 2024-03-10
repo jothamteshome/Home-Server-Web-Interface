@@ -83,6 +83,39 @@ const getImageBatch = function () {
 }
 
 
+const makeGalleryClickable = function () {
+    const gallery = document.querySelector('.contentGallery');
+    const contents = gallery.querySelectorAll('.content');
+
+    for (const link of contents) {
+        link.href = link.getAttribute('future-href');
+    }
+}
+
+
+const setUploadGallerySelectors = function () {
+    const gallery = document.querySelector('.contentGallery');
+    const contents = gallery.querySelectorAll('.content');
+
+    const ids = new FormData();
+
+    for (const link of contents) {
+        ids.append("id", link.getAttribute('future-href').split("/").slice(-1)[0]);
+    }
+
+    jQuery.ajax({
+        url: '/setUploadSelectorIds',
+        data: ids,
+        type: "POST",
+        processData: false,
+        contentType: false,
+        success: function(returned_data) {
+            makeGalleryClickable();
+        }
+    })
+}
+
+
 // Sends images to server for uploading in batches
 const sendBatchedImagesToServer = function (route) {
     // SEND DATA TO SERVER VIA jQuery.ajax({})
@@ -97,11 +130,13 @@ const sendBatchedImagesToServer = function (route) {
             route = returnRouteData(route, img_data.success);
             route['success'] = returnUploadMessage(img_data.success);
 
-            displayImages(img_data.content, route);
+            displayImages(img_data.content, route, true);
             displayedCount += Object.keys(img_data.content).length;
 
             if (displayedCount < fileUpload.files.length){
                 sendBatchedImagesToServer(route);
+            } else {
+                setUploadGallerySelectors();
             }
         }
     });

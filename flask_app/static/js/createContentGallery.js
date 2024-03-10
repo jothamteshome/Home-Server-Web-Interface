@@ -1,7 +1,7 @@
 let displayedCount = 0;
 
 // Build content gallery display section
-const displayImages = function (img_data, route) {
+const displayImages = function (img_data, route, uploadGallery) {
     const loadingContent = document.querySelector('.loadingContent');
     const loadingMessage = loadingContent.querySelector('.loadingMessage');
     loadingContent.style.display = "none";
@@ -36,7 +36,13 @@ const displayImages = function (img_data, route) {
         // Create link element to display images
         const link = document.createElement('a');
         link.classList.add('content');
-        link.href = `${route['link_href']}/${img}`;
+
+        if (uploadGallery) {
+            link.setAttribute('future-href', `${route['link_href']}/${img}`)
+        } else {
+            link.href = `${route['link_href']}/${img}`;
+        }
+        
 
         // Set image border to red if it is a duplicate image
         if (img_data[img].duplicate) { link.style.borderColor = "#ff0000"; }

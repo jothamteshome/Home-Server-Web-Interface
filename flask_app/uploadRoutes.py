@@ -34,4 +34,19 @@ def processUpload():
 
     return json.dumps(display_data)
 
+
+@app.route('/setUploadSelectorIds', methods=['POST'])
+@login_required
+def setUploadSelectorIds():
+    ids = request.form.getlist('id')
+
+    databaseUpdate = []
+
+    for i in range(len(ids)):
+        prev_id, next_id = ids[i-1], ids[(i+1) % len(ids)]
+        databaseUpdate.append([prev_id, next_id, ids[i]])
+
+    db.updateShortContent(['prev_content_id', 'next_content_id'], databaseUpdate)
+
+    return json.dumps({})
     
