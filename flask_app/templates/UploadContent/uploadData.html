@@ -1,0 +1,32 @@
+{% extends 'shared/layout.html' %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/contentGallery.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/loadingPage.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}">
+{% endblock %}
+
+{% block extrajs %}
+<script src="{{ url_for('static', filename='js/UploadContent/uploadData.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/createContentGallery.js') }}" defer></script>
+{% endblock %}
+
+{% block maincontent %}
+<form class="form">
+    {% if new_dir %}
+        <input type='text' class="folder-name-input" placeholder="Insert Folder Name Here" name="name" required>
+    {% endif %}
+    <textarea class="caption-section" rows="5" columns="33" placeholder="Insert Captions Here" name="caption" {% if caption_required %} required {% endif %}></textarea>
+    <label for="choose-images" class="file-selector-label">Upload Image(s)</label>
+    
+    <input type="file" title="Upload shortform content" 
+    id="choose-images" class="file-selector" name="file" accept="image/*, video/*" multiple required>
+
+    <input type="button" title="Submit fields for new image upload" value="Upload Image(s)" class="submit">
+</form>
+
+<div class="loadingContent">
+    <h1 class="loadingMessage"></h1>
+    <img src="{{url_for('static', filename='images/loading-wheel-gif.gif')}}" loading="lazy" alt="loading-gif">
+</div>
+{% endblock %}

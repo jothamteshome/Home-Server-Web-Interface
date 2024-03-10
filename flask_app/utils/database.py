@@ -57,7 +57,7 @@ class database:
 
     def createTables(self, purge=False, data_path='flask_app/database/'):
         # Create new tables
-        tables = {"users": True, 'comicData': True, 'showData': True, 'shortContentData': True, 'uploadDirectories': True}
+        tables = {"users": True, 'comicData': True, 'showData': True, 'shortContentData': True, 'uploadSearchDirectories': True, 'uploadSourceDirectories': True}
 
         for table in tables:
             if purge and tables[table]:
@@ -107,39 +107,57 @@ class database:
         return data
 
     
-    def storeUploadDirectories(self, data):
+    def storeUploadSearchDirectories(self, data):
         all_prepared_data = []
 
         for row in data:
-            prepared_data = (row[0].encode('utf-8'), row[1].encode('utf-8'), row[2].encode('utf-8'), row[3], row[4])
+            prepared_data = (row[0].encode('utf-8'), row[1].encode('utf-8'), row[2].encode('utf-8'), row[3], row[4], row[5], row[6])
 
             all_prepared_data.append(prepared_data)
 
-        self.insertRows('uploadDirectories',
-                        ['section_name', 'section_directory', 'section_content_style', 'separate_uploaded_content', 'separate_image_video'],
+        self.insertRows('uploadSearchDirectories',
+                        ['section_name', 'section_directory', 'section_content_style', 'separate_uploaded_content', 'separate_image_video', 'search_dir_storage', "caption_required"],
                         all_prepared_data)
         
     
-    def getUploadDirectory(self, dir_name):
-        uploadDirectory = self.query("SELECT * FROM uploadDirectories WHERE section_name=%s", [dir_name])
+    def getUploadSearchDirectory(self, dir_name):
+        uploadDirectory = self.query("SELECT * FROM uploadSearchDirectories WHERE section_name=%s", [dir_name])
 
         return self._decodeDBData(uploadDirectory[0])
     
 
-    def getAllUploadDirectories(self):
+    def getAllUploadSearchDirectories(self):
         directoryOptions = []
 
-        content_styles = self.getDecodedData("SELECT section_content_style FROM uploadDirectories GROUP BY section_content_style ORDER BY section_content_style")
+        content_styles = self.getDecodedData("SELECT section_content_style FROM uploadSearchDirectories GROUP BY section_content_style ORDER BY section_content_style")
 
         for content_style in content_styles:
             directoryOptions.append({'name': f"--- {content_style['section_content_style']} ---", 'disabled': True})
 
-            results = self.getDecodedData("SELECT section_name FROM uploadDirectories WHERE section_content_style=%s ORDER BY %s", [content_style['section_content_style'], 'section_name'])
+            results = self.getDecodedData("SELECT section_name FROM uploadSearchDirectories WHERE section_content_style=%s ORDER BY %s", [content_style['section_content_style'], 'section_name'])
 
             directoryOptions.extend([{'name': result['section_name']} for result in results])
 
         return directoryOptions
-        
+    
+
+    def storeUploadSourceDirectories(self, data):
+        all_prepared_data = []
+
+        for row in data:
+            prepared_data = (row[0].encode('utf-8'), row[1].encode('utf-8'))
+
+            all_prepared_data.append(prepared_data)
+
+        self.insertRows('uploadSourceDirectories',
+                        ['search_dir_name', 'source_dir_name'],
+                        all_prepared_data)
+
+
+    def getUploadSourceDirectories(self, search_dir_name):
+        source_dirs = self.getDecodedData("SELECT source_dir_name FROM uploadSourceDirectories where search_dir_name = %s ORDER BY %s", [search_dir_name, 'source_dir_name'])
+
+        return [source_dir['source_dir_name'] for source_dir in source_dirs]    
 
     
     def storeComics(self, data):

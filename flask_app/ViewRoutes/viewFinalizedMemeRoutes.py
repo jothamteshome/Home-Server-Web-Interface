@@ -19,9 +19,9 @@ def viewFinalizedMemes():
 
 
 # Returns data from temp directory for singular finalized meme
-@app.route('/viewFinalizedMemes/<accessType>/<content_id>')
+@app.route('/viewFinalizedMemes/<content_id>')
 @login_required
-def singleFinalizedMeme(accessType, content_id):
+def singleFinalizedMeme(content_id):
     contentData = db.getShortContent(content_id)
 
     _copyFilesToTemp([[contentData['content_name'], contentData['content_loc']]])
@@ -45,11 +45,7 @@ def singleFinalizedMeme(accessType, content_id):
 
     success_data = {'message': f"Currently viewing captions for {content_hash}", 
                     'alt': f"Meme with finalized caption",
-                    'href': "/viewFinalizedMemes", 'button-text': "View More Memes", 'loop': True, 'link_href': "/viewFinalizedMemes/Viewing"}
-    
-    if accessType == "Uploaded":
-        success_data['href'] = "/uploadFinalizedMeme"
-        success_data['button-text'] = "Upload Another Meme"
+                    'href': "/viewFinalizedMemes", 'button-text': "View More Memes", 'loop': True, 'link_href': "/viewFinalizedMemes"}
     
     return render_template('displayReturnedContent.html', img_data=[img_data], success=success_data)
 
@@ -62,7 +58,7 @@ def getFinalizedMemeData(name, content_type_first, sorting):
     resetFile = form_fields['resetFile'] == "true"
 
     content = collectFinalizedMemes(displayed, resetFile, 'shuffle')
-    route = {'link_href': "/viewFinalizedMemes/Viewing", 'repeat': "/viewFinalizedMemes", 'repeatMessage': 'View More Memes'}
+    route = {'link_href': "/viewFinalizedMemes", 'repeat': "/viewFinalizedMemes", 'repeatMessage': 'View More Memes'}
 
     return json.dumps({'data': content, 'route': route})
 

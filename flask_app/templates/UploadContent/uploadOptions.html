@@ -1,0 +1,23 @@
+{% extends 'shared/layout.html' %}
+
+{% block extracss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/viewOptions.css') }}">
+{% endblock %}
+
+{% block maincontent %}
+<div class="optionsContainer">
+    <div class="success-message">Success!!!</div>
+
+    <ul class="optionList">
+        {% for option in options %}
+
+        <a class="option" href="/uploadContent/Options/{{search_dir}}/{{options[option]}}">
+            <div class="optionText">
+                <span class="show-name">{{option}}</span>
+            </div>
+        </a>
+
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

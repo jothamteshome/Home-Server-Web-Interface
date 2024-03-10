@@ -1,16 +1,7 @@
 {% extends 'shared/layout.html' %}
 
-{% block extracss %}
-{% block uploadCSS %}{% endblock %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/contentGallery.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/loadingPage.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}">
-{% endblock %}
-
 {% block extrajs %}
-{% block uploadJS %}{% endblock %}
 <script src="{{ url_for('static', filename='js/UploadContent/upload.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/createContentGallery.js') }}" defer></script>
 {% endblock %}
 
 {% block maincontent %}
@@ -24,18 +15,7 @@
             {% endif %}
         {% endfor %}
     </select>
-    <input type='text' class="folder-name-input" placeholder="Insert Folder Name Here" name="name" required>
-    <textarea class="caption-section" rows="5" columns="33" placeholder="Insert Caption Here" name="caption"></textarea>
-    <label for="choose-images" class="file-selector-label">Upload Image(s)</label>
     
-    <input type="file" title="Upload shortform content" 
-    id="choose-images" class="file-selector" name="file" accept="image/*, video/*" multiple required>
-
-    <input type="button" title="Submit fields for new image upload" value="Upload Image(s)" class="submit">
+    <input type="button" title="Submit search directory for image uploading" value="Select Directory" class="submit">
 </form>
-
-<div class="loadingContent">
-    <h1 class="loadingMessage"></h1>
-    <img src="{{url_for('static', filename='images/loading-wheel-gif.gif')}}" loading="lazy" alt="loading-gif">
-</div>
 {% endblock %}

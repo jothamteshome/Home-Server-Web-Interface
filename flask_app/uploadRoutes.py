@@ -12,7 +12,7 @@ db = database()
 @login_required
 @clear_temp
 def uploadContent():
-    options = db.getAllUploadDirectories()
+    options = db.getAllUploadSearchDirectories()
     return cond_render_template('UploadContent/upload.html',
                                 options=options,
                                 cond_statement=session['user_info']['role'] == "admin")
@@ -23,16 +23,57 @@ def uploadContent():
 def processUpload():
     search_dir = request.form['search_dir'].strip()
     source_dir = request.form['source'].strip()
+    new_dir = request.form['new_dir'] == "true"
     captions = request.form.getlist('captions')
     images = list(request.files.listvalues())[0]
 
+    if new_dir:
+        db.storeUploadSourceDirectories([(search_dir, source_dir)])
+
+    routes = {"Shortform Content": "/viewShortformContent", "Premade Meme": "/viewPremadeMemes", "Finalized Meme": "/viewFinalizedMemes"}
+
+    contentType = db.getDecodedData('SELECT section_content_style FROM uploadSearchDirectories WHERE section_name = %s', [search_dir])[0]['section_content_style']
+
     upload_count, returnedContent = uploadImages(search_dir, source_dir, captions, images)
 
-    success_data = {'uploaded': upload_count, 'source_name': source_dir, 'duplicates': len(images) - upload_count}
-
+    success_data = {'uploaded': upload_count, 'source_name': source_dir, 'duplicates': len(images) - upload_count, 'route': routes[contentType]}
     display_data = {'success': success_data, 'content': returnedContent}
 
     return json.dumps(display_data)
+
+
+@app.route('/uploadContent/Options/<search_dir>')
+@login_required
+def uploadSearchOptions(search_dir):
+    search_dir_info = db.getUploadSearchDirectory(" ".join(search_dir.split("__")))
+
+    if search_dir_info['search_dir_storage']:
+        return cond_render_template('UploadContent/uploadData.html',
+                                        new_dir=False,
+                                        caption_required=search_dir_info['caption_required']==True,
+                                        cond_statement=True)
+    
+
+    options = db.getUploadSourceDirectories(" ".join(search_dir.split("__")))
+
+    options = {option: "__".join(option.split(" ")) for option in options}
+    options["Create Folder"] = "Create__Folder"
+
+    return cond_render_template('UploadContent/uploadOptions.html',
+                                search_dir=search_dir,
+                                options=options,
+                                cond_statement=session['user_info']['role'] == "admin")
+
+
+@app.route('/uploadContent/Options/<search_dir>/<source_dir>')
+@login_required
+def processUploading(search_dir, source_dir):
+    search_dir = " ".join(search_dir.split("__"))
+    caption_required = db.getDecodedData('SELECT caption_required FROM uploadSearchDirectories WHERE section_name = %s', [search_dir])[0]['caption_required']
+    return cond_render_template('UploadContent/uploadData.html',
+                                new_dir=source_dir=="Create__Folder",
+                                caption_required=caption_required==True,
+                                cond_statement=True)
 
 
 @app.route('/setUploadSelectorIds', methods=['POST'])

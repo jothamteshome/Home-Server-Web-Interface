@@ -191,14 +191,17 @@ def _addShortformContentToDatabase():
 
     SEARCH_DIRS = data['short-form-search-dirs']
 
-    uploadDirectories = []
+    uploadSearchDirectories = []
+    uploadSourceDirectories = set()
 
     for search_dir in SEARCH_DIRS:
         search_dir_name = search_dir.split("\\")[-1]
 
-        uploadDirectories.append((search_dir_name, search_dir, "Shortform Content",
+        uploadSearchDirectories.append((search_dir_name, search_dir, "Shortform Content",
                                   search_dir_name in data['upload-shortform-special-criteria']["separate-uploaded-content"], 
-                                  search_dir_name in data['upload-shortform-special-criteria']["separate-image-video"]))
+                                  search_dir_name in data['upload-shortform-special-criteria']["separate-image-video"],
+                                  search_dir_name in data['upload-shortform-special-criteria']["search-dir-storage"],
+                                  search_dir_name in data['upload-shortform-special-criteria']["caption-required"]))
 
         content_directories = _tryListDir(search_dir)
 
@@ -230,12 +233,14 @@ def _addShortformContentToDatabase():
                             caption_loc = ""
 
                         add_to_database.append((hash(content_path), content, content_type, content_path, search_dir_name, content_dir_name, 'Shortform Content', has_caption, caption_loc, "", ""))
+                        uploadSourceDirectories.add((search_dir_name, content_dir_name))
 
                         db_entries.discard(content_path)
 
             db.storeShortContent(add_to_database)
 
-    db.storeUploadDirectories(uploadDirectories)
+    db.storeUploadSearchDirectories(uploadSearchDirectories)
+    db.storeUploadSourceDirectories(uploadSourceDirectories)
 
 
     for entry in db_entries:
@@ -254,14 +259,17 @@ def _addPremadeMemesToDatabase():
 
     SEARCH_DIRS = data['conditionally-included-routes']['premade-memes-dirs']
 
-    uploadDirectories = []
+    uploadSearchDirectories = []
+    uploadSourceDirectories = set()
 
     for search_dir in SEARCH_DIRS:
         search_dir_name = search_dir.split("\\")[-1]
 
-        uploadDirectories.append((search_dir_name, search_dir, "Premade Meme",
+        uploadSearchDirectories.append((search_dir_name, search_dir, "Premade Meme",
                                   search_dir_name in data['upload-shortform-special-criteria']["separate-uploaded-content"], 
-                                  search_dir_name in data['upload-shortform-special-criteria']["separate-image-video"]))
+                                  search_dir_name in data['upload-shortform-special-criteria']["separate-image-video"],
+                                  search_dir_name in data['upload-shortform-special-criteria']["search-dir-storage"],
+                                  search_dir_name in data['upload-shortform-special-criteria']["caption-required"]))
         
         content_directories = _tryListDir(search_dir)
 
@@ -290,12 +298,14 @@ def _addPremadeMemesToDatabase():
                             caption_loc = ""
                         
                         add_to_database.append((hash(content_path), content, content_type, content_path, search_dir_name, content_dir_name, 'Premade Meme', has_caption, caption_loc, "", ""))
+                        uploadSourceDirectories.add((search_dir_name, content_dir_name))
 
                         db_entries.discard(content_path)
 
             db.storeShortContent(add_to_database)
 
-    db.storeUploadDirectories(uploadDirectories)
+    db.storeUploadSearchDirectories(uploadSearchDirectories)
+    db.storeUploadSourceDirectories(uploadSourceDirectories)
 
     for entry in db_entries:
         db.query('DELETE FROM shortContentData WHERE content_loc=%s', [entry])
@@ -314,7 +324,7 @@ def _addFinalizedMemesToDatabase():
     content_dir = data['conditionally-included-routes']['finalized-memes-dir']
     content_dir_name = content_dir.split("\\")[-1]
 
-    db.storeUploadDirectories([("Finalized Memes", content_dir, "Finalized Meme", 0, 0)])
+    db.storeUploadSearchDirectories([("Finalized Meme", content_dir, "Finalized Meme", 0, 1, 1, 1)])
 
     add_to_database = []
 

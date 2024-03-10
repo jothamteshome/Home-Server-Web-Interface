@@ -50,7 +50,10 @@ def _handleCaptionUpload(contentPath, content_hash, caption, img_ext):
 
 
 def _createDirectoryPath(dir_info, source_name, captions):
-    contentPath = f"{dir_info['section_directory']}\\{source_name}"
+    if dir_info['search_dir_storage']:
+        contentPath = f"{dir_info['section_directory']}"
+    else:
+        contentPath = f"{dir_info['section_directory']}\\{source_name}"
 
     if dir_info['separate_uploaded_content']:
         contentPath = f"{contentPath}\\Uploaded Content"
@@ -59,7 +62,7 @@ def _createDirectoryPath(dir_info, source_name, captions):
         os.makedirs(f"{contentPath}\\Images", exist_ok=True)
         os.makedirs(f"{contentPath}\\Videos", exist_ok=True)
 
-    if captions:
+    if captions or dir_info['caption_required']:
         os.makedirs(f"{contentPath}\\Captions", exist_ok=True)
 
     return contentPath
@@ -119,8 +122,6 @@ def _handleUploadTypeSemantics(contentPath, file, hash_string, separate_content)
         existing_content = _tryListDir(f"{contentPath}\\Videos")
         existing_content.extend(_tryListDir(f"{contentPath}\\Images"))
 
-        existing_content = existing_content
-
         # Determine directory of file based on content type
         # Make first character of video or image uppercase, then add "s" to the end
         endDir = f"{contentPath}\\{content_type[0].upper()}{content_type[1:]}s"
@@ -137,7 +138,11 @@ def _handleUploadTypeSemantics(contentPath, file, hash_string, separate_content)
 
 
 def uploadImages(search_dir, source_name, captions, files):
-    dir_info = db.getUploadDirectory(search_dir)
+    dir_info = db.getUploadSearchDirectory(search_dir)
+
+    if dir_info['search_dir_storage']:
+        source_name = dir_info['section_directory']
+        source_name = source_name.split("\\")[-1]
 
     # Create necessary paths for uploading content
     contentPath = _createDirectoryPath(dir_info, source_name, captions)
