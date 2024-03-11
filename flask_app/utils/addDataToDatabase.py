@@ -45,11 +45,12 @@ def _addComicsToDatabase():
 
     db_entries = {entry['comic_loc'].decode('utf-8') for entry in db.query("SELECT comic_loc FROM comicData")}
 
+    add_to_database = []
+    add_comic_pages = []
+
     for search_dir in data['retrieve-comic-content-dirs']['search-directories']:
         for subgenre in search_dir['sub-genres']:
-            subgenre_dir = f"{search_dir['main-dir']}{subgenre}"
-
-            add_to_database = []
+            subgenre_dir = f"{search_dir['main-dir']}\\{subgenre}"
 
             for franchise in _tryListDir(subgenre_dir):
                 franchise_dir = f"{subgenre_dir}\\{franchise}"
@@ -72,18 +73,40 @@ def _addComicsToDatabase():
                         has_chapters = 1
                         for comic_part in dirContents[1]:
                             comic_part_loc = f"{dirContents[0]}\\{comic_part}"
-                            add_to_database.append((hash(comic_part_loc), comic_part, franchise, comic, 0, author, comic_part_loc))
+
+                            # Check to make sure directory is not empty
+                            comicPages = _tryListDir(comic_part_loc)
+                            if comicPages:
+                                # Add comic to database
+                                add_to_database.append((hash(comic_part_loc), comic_part, subgenre, franchise, comic, 0, author, comic_part_loc))
+
+                                # Add comic pages to database
+                                for comic_page in comicPages:
+                                    add_comic_pages.append((hash(comic_part_loc), comic_page))
                             
                             db_entries.discard(comic_part_loc)
                             
-                    add_to_database.append((hash(comic_loc), comic, franchise,"", has_chapters, author, comic_loc))
+                    # Check to make sure directory is not empty
+                    comicPages = _tryListDir(comic_loc)
+                    if comicPages:
+                        # Add comic to database
+                        add_to_database.append((hash(comic_loc), comic, subgenre, franchise,"", has_chapters, author, comic_loc))
+
+                        # Add comic pages to database
+                        if not has_chapters:
+                            for comic_page in comicPages:
+                                add_comic_pages.append((hash(comic_loc), comic_page))
                     
                     db_entries.discard(comic_loc)
             
-            db.storeComics(add_to_database)
+    db.storeComics(add_to_database)
+    db.storeComicPages(add_comic_pages)
 
     for entry in db_entries:
-        db.query('DELETE FROM comicData WHERE comic_loc=%s', [entry])
+        comicData = db.getDecodedData("SELECT * FROM comicData WHERE comic_loc=%s", [entry])[0]
+
+        db.query("DELETE FROM comicData WHERE comic_id=%s", [comicData['comic_id']])
+        db.query('DELETE FROM comicPages WHERE comic_id=%s', [comicData['comic_id']])
 
 
 ####################################################################
@@ -119,6 +142,8 @@ def _addShowsToDatabase():
 
     SHOW_SUBDIRS = data['retrieve-show-content-dirs']['show-subdirs']
 
+    add_to_database = []
+
     for search_dir in data['retrieve-show-content-dirs']['search-directories']:
         for show_dir in _tryListDir(search_dir):
             show_dir_path = f"{search_dir}\\{show_dir}\\Movie Content"
@@ -130,7 +155,6 @@ def _addShowsToDatabase():
 
                 show_contents.extend(_collectShowContent(show_dir_path))
 
-                add_to_database = []
 
                 if show_dir in SHOW_SUBDIRS:
                     for subdir in SHOW_SUBDIRS[show_dir]:
@@ -149,16 +173,12 @@ def _addShowsToDatabase():
                     add_to_database.append((hash(show[1]), show[0], show_dir, title, search_dir.split("\\")[-1], thumbnail, show[1]))
                     
                     db_entries.discard(show[1])
-
-                db.storeShows(add_to_database)
                     
 
     for show_dir_path in data['retrieve-show-content-dirs']['extra-directories']:
         show_contents = []
 
         show_contents.extend(_collectShowContent(show_dir_path))
-
-        add_to_database = []
 
         for show in show_contents:
             show_name_split = show[0].split(" - ")
@@ -173,7 +193,7 @@ def _addShowsToDatabase():
             
             db_entries.discard(show[1])
 
-        db.storeShows(add_to_database)
+    db.storeShows(add_to_database)
 
     for entry in db_entries:
         db.query('DELETE FROM showData WHERE show_loc=%s', [entry])
@@ -190,6 +210,7 @@ def _addShortformContentToDatabase():
     db_entries = {entry['content_loc'].decode('utf-8') for entry in db.query("SELECT content_loc FROM shortContentData WHERE content_style=%s", ['Shortform Content'])}
 
     SEARCH_DIRS = data['short-form-search-dirs']
+    add_to_database = []
 
     uploadSearchDirectories = []
     uploadSourceDirectories = set()
@@ -212,7 +233,6 @@ def _addShortformContentToDatabase():
             if "Uploaded Content" in _tryListDir(content_dir_path):
                 content_dir_path = f"{content_dir_path}\\Uploaded Content"
 
-            add_to_database = []
 
             for subdir in ["\\Images", "\\Scraped Content", "\\Videos"]:
                 subdir_path = f"{content_dir_path}{subdir}"
@@ -237,7 +257,7 @@ def _addShortformContentToDatabase():
 
                         db_entries.discard(content_path)
 
-            db.storeShortContent(add_to_database)
+    db.storeShortContent(add_to_database)
 
     db.storeUploadSearchDirectories(uploadSearchDirectories)
     db.storeUploadSourceDirectories(uploadSourceDirectories)
@@ -258,6 +278,7 @@ def _addPremadeMemesToDatabase():
     db_entries = {entry['content_loc'].decode('utf-8') for entry in db.query("SELECT content_loc FROM shortContentData WHERE content_style=%s", ['Premade Meme'])}
 
     SEARCH_DIRS = data['conditionally-included-routes']['premade-memes-dirs']
+    add_to_database = []
 
     uploadSearchDirectories = []
     uploadSourceDirectories = set()
@@ -276,8 +297,6 @@ def _addPremadeMemesToDatabase():
         for content_dir in content_directories:
             content_dir_name = content_dir.split("\\")[-1]
             content_dir_path = f"{search_dir}\\{content_dir}"
-
-            add_to_database = []
 
             for subdir in data['conditionally-included-routes']['premade-memes-subdirs']:
                 subdir_path = f"{content_dir_path}{subdir}"
@@ -302,7 +321,7 @@ def _addPremadeMemesToDatabase():
 
                         db_entries.discard(content_path)
 
-            db.storeShortContent(add_to_database)
+    db.storeShortContent(add_to_database)
 
     db.storeUploadSearchDirectories(uploadSearchDirectories)
     db.storeUploadSourceDirectories(uploadSourceDirectories)

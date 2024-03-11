@@ -57,13 +57,14 @@ class database:
 
     def createTables(self, purge=False, data_path='flask_app/database/'):
         # Create new tables
-        tables = {"users": True, 'comicData': True, 'showData': True, 'shortContentData': True, 'uploadSearchDirectories': True, 'uploadSourceDirectories': True}
+        tables = ["users", 'comicData', 'comicPages', 'showData', 'shortContentData', 'uploadSearchDirectories', 'uploadSourceDirectories']
 
-        for table in tables:
-            if purge and tables[table]:
+        if purge:
+            for table in tables[::-1]:
                 self.query(f'DROP TABLE IF EXISTS {table}')
 
 
+        for table in tables:
             with open(f"{data_path}/{table}.sql", "r") as sql_table:
                 self.query(" ".join(sql_table.readlines()))
 
@@ -165,18 +166,37 @@ class database:
 
         for row in data:
             prepared_data = (row[0], row[1].encode('utf-8'), row[2].encode('utf-8'), row[3].encode('utf-8'),
-                             row[4], row[5].encode('utf-8'), row[6].encode('utf-8'))
+                             row[4].encode('utf-8'), row[5], row[6].encode('utf-8'), row[7].encode('utf-8'))
             
             all_prepared_data.append(prepared_data)
 
         self.insertRows('comicData', 
-                        ['comic_id', 'comic_name', 'comic_franchise', 'comic_series', 'has_chapters', 'comic_author', 'comic_loc'], 
+                        ['comic_id', 'comic_name', 'comic_genre', 'comic_franchise', 'comic_series', 'has_chapters', 'comic_author', 'comic_loc'], 
                         all_prepared_data)
 
     def getComic(self, comic_id):
         comicData = self.query("SELECT * FROM comicData WHERE comic_id=%s", [comic_id])
 
         return self._decodeDBData(comicData[0])
+    
+
+    def storeComicPages(self, data):
+        all_prepared_data = []
+
+        for row in data:
+            prepared_data = (row[0], row[1].encode('utf-8'))
+            all_prepared_data.append(prepared_data)
+        
+        self.insertRows('comicPages',
+                        ['comic_id', 'comic_page_name'],
+                        all_prepared_data)
+        
+    
+    def getComicPages(self, comic_id):
+        comicPages = self.getDecodedData('SELECT comic_page_name FROM comicPages WHERE comic_id=%s ORDER BY %s', [comic_id, 'comic_page_id'])
+
+        return [page['comic_page_name'] for page in comicPages]
+
 
     def storeShows(self, data):
         all_prepared_data = []

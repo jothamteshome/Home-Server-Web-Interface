@@ -131,11 +131,12 @@ def _sortComics(fileDict, sorting):
 
 def _handleDisplayingComic(comic_id):
     comicData = db.getComic(comic_id)
+    comicPages = db.getComicPages(comic_id)
     comic = []
 
     loc = comicData['comic_loc']
 
-    for page in os.listdir(loc):
+    for page in comicPages:
         comic.append((page, f"{loc}\\{page}"))
 
     _copyFilesToTemp(comic, comic_id)
@@ -144,23 +145,24 @@ def _handleDisplayingComic(comic_id):
 
 
 def _listComicNames():
-    data = _openJSONDirectoriesFile()
     comicData = []
 
-    for search_dir in data['retrieve-comic-content-dirs']['search-directories']:
-        for subgenre in search_dir['sub-genres']:
-            subOption = subgenre.replace("\\", "")
-            subOption = f"----- {subOption} -----"
-            comicData.append({'name': subOption, 'optionPath': f"{search_dir['main-dir']}{subgenre}", 'disabled': True})
-
-            subgenre_comics = []
-            for file in os.listdir(f"{search_dir['main-dir']}{subgenre}"):
-                if os.listdir(f"{search_dir['main-dir']}{subgenre}\\{file}"):
-                    subgenre_comics.append({'name': file, 'data': json.dumps({'name': "__".join(file.split(" ")), 'optionPath': f"{search_dir['main-dir']}{subgenre}\\{file}"})})
-
-            comicData.extend(sorted(subgenre_comics, key=lambda x: x['name']))
+    GENRES = [search_dir['comic_genre'] for search_dir in 
+                   db.getDecodedData("SELECT comic_genre FROM comicData GROUP BY comic_genre ORDER BY comic_genre")]
     
-                
+    for genre in GENRES:
+        comicData.append({'name': f"----- {genre} -----", 'disabled': True})
+
+        comics = db.getDecodedData("SELECT comic_franchise FROM comicData WHERE comic_genre=%s GROUP BY comic_franchise", [genre])
+
+        formatted_comics = []
+
+        for comic in comics:
+            formatted_comics.append({'name': comic['comic_franchise'], 
+                                     'data': json.dumps({'name': "__".join(comic['comic_franchise'].split(" "))})})
+
+        comicData.extend(sorted(formatted_comics, key=lambda x: x['name'].lower()))
+
     return comicData
 
 
@@ -294,8 +296,6 @@ def _listNames(directory):
 
 # Collect all valid folders with short-form content
 def collectShortformFolders():
-    SEARCH_DIRS = _openJSONDirectoriesFile()['short-form-search-dirs']
-
     SEARCH_DIRS = db.query("SELECT search_dir_name FROM shortContentData WHERE content_style=%s GROUP BY search_dir_name ORDER BY search_dir_name", ['Shortform Content'])
     SEARCH_DIRS = [search_dir['search_dir_name'].decode('utf-8') for search_dir in SEARCH_DIRS]
 

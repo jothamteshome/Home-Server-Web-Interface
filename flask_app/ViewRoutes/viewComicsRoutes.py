@@ -17,17 +17,6 @@ def viewComics():
     return render_template('viewContent/viewComics.html', contentList=_listComicNames())
 
 
-@app.route('/processComics', methods=['POST'])
-@login_required
-def processComics():
-    form_fields = dict((key, request.form.getlist(key)[0]) for key in list(request.form.keys()))
-    optionPath = form_fields['optionPath']
-    sorting = form_fields['sorting'].strip().lower()
-
-    content = collectComics(optionPath, sorting)
-    return json.dumps(content)
-
-
 @app.route('/comicData/<franchise_name>/<sorting>', methods=['POST'])
 @login_required
 def getComicData(franchise_name, sorting):
