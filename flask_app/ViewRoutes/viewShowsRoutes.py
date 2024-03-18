@@ -33,7 +33,6 @@ def processShows():
 # Handles the downloading of content to temp directory after show selection is made
 @app.route('/downloadTempShowContent/<show_id>', methods=['POST'])
 @login_required
-@clear_temp
 def downloadTempShowContent(show_id):
     show = db.getShow(show_id)
 

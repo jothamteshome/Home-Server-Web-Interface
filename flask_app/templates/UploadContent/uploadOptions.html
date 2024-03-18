@@ -2,11 +2,12 @@
 
 {% block extracss %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/viewOptions.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/contentGallery.css') }}">
 {% endblock %}
 
 {% block maincontent %}
 <div class="optionsContainer">
-    <div class="success-message">Success!!!</div>
+    <h1 class="success-message">{{options|length - 1}} Options for {{non_url_search_dir}}</h1>
 
     <ul class="optionList">
         {% for option in options %}

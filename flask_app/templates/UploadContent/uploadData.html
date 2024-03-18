@@ -15,6 +15,8 @@
 <form class="form">
     {% if new_dir %}
         <input type='text' class="folder-name-input" placeholder="Insert Folder Name Here" name="name" required>
+    {% else %}
+        <h3>{{source_dir}}</h3>
     {% endif %}
     <textarea class="caption-section" rows="5" columns="33" placeholder="Insert Captions Here" name="caption" {% if caption_required %} required {% endif %}></textarea>
     <label for="choose-images" class="file-selector-label">Upload Image(s)</label>

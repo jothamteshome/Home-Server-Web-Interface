@@ -61,6 +61,7 @@ def uploadSearchOptions(search_dir):
 
     return cond_render_template('UploadContent/uploadOptions.html',
                                 search_dir=search_dir,
+                                non_url_search_dir=" ".join(search_dir.split("__")),
                                 options=options,
                                 cond_statement=session['user_info']['role'] == "admin")
 
@@ -71,6 +72,7 @@ def processUploading(search_dir, source_dir):
     search_dir = " ".join(search_dir.split("__"))
     caption_required = db.getDecodedData('SELECT caption_required FROM uploadSearchDirectories WHERE section_name = %s', [search_dir])[0]['caption_required']
     return cond_render_template('UploadContent/uploadData.html',
+                                source_dir=" ".join(source_dir.split("__")),
                                 new_dir=source_dir=="Create__Folder",
                                 caption_required=caption_required==True,
                                 cond_statement=True)

@@ -36,10 +36,13 @@ const returnUploadMessage = function (success_data) {
         message = `${message} ${dirData.slice(-1)[0].split("__").join(" ")}`;
     }
 
-    if (success_data.duplicates === 0) {
+    if (success_data.duplicates > 0) {
+        duplicateCount += success_data.duplicates;
+    }
+
+    if (duplicateCount === 0) {
         return message;
     } else {
-        duplicateCount += success_data.duplicates
         return `${message} (${duplicateCount} duplicates found)`
     }
 }

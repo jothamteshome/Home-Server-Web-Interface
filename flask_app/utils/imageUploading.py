@@ -61,6 +61,8 @@ def _createDirectoryPath(dir_info, source_name, captions):
     if dir_info['separate_image_video']:
         os.makedirs(f"{contentPath}\\Images", exist_ok=True)
         os.makedirs(f"{contentPath}\\Videos", exist_ok=True)
+    else:
+        os.makedirs(contentPath, exist_ok=True)
 
     if captions or dir_info['caption_required']:
         os.makedirs(f"{contentPath}\\Captions", exist_ok=True)
